@@ -416,7 +416,10 @@
         </div>
 
         <div class="canvas-container">
-            <canvas id="canvas" width="1920" height="1080"></canvas>
+            <canvas id="canvas" width="3840" height="2160"></canvas>
+            <video id="backgroundVideo" style="display: none;" loop muted>
+                <source src="paper.mp4" type="video/mp4">
+            </video>
         </div>
 
         <div class="animation-controls">
@@ -436,11 +439,7 @@
                 <input type="range" id="floatSlider" min="5" max="30" step="1" value="15">
                 <span id="floatValue">15px</span>
             </div>
-            <div class="control-group">
-                <label for="scaleSlider">Scale Amount</label>
-                <input type="range" id="scaleSlider" min="0.02" max="0.15" step="0.01" value="0.05">
-                <span id="scaleValue">0.05</span>
-            </div>
+
             <div class="control-group">
                 <label for="jitterSlider">Jitter</label>
                 <input type="range" id="jitterSlider" min="0" max="3" step="0.1" value="1">
@@ -488,6 +487,7 @@
             <ul>
                 <li>Click "Upload Image" to select an image file</li>
                 <li>The image will be placed on vintage paper with torn edges</li>
+                <li>Your video plays inside the torn paper area</li>
                 <li>The effect is applied instantly on the canvas</li>
                 <li>Try different images to see various torn paper effects</li>
                 <li>Adjust animation settings above to customize the floating effect</li>
@@ -501,6 +501,7 @@
                 this.canvas = document.getElementById('canvas');
                 this.ctx = this.canvas.getContext('2d');
                 this.fileInput = document.getElementById('fileInput');
+                this.backgroundVideo = document.getElementById('backgroundVideo');
                 this.paperTexture = null;
                 
                 // Animation properties
@@ -516,7 +517,6 @@
                     speed: 1.0,
                     rotationRange: 3,
                     floatDistance: 15,
-                    scaleAmount: 0.05,
                     jitterAmount: 1.0
                 };
                 
@@ -528,6 +528,7 @@
                 this.createPaperTexture();
                 this.setupAnimationControls();
                 this.setupExportControls();
+                this.setupBackgroundVideo();
                 this.drawInitialState();
             }
 
@@ -536,7 +537,6 @@
                     speed: { slider: 'speedSlider', value: 'speedValue', suffix: 'x' },
                     rotationRange: { slider: 'rotationSlider', value: 'rotationValue', suffix: '°' },
                     floatDistance: { slider: 'floatSlider', value: 'floatValue', suffix: 'px' },
-                    scaleAmount: { slider: 'scaleSlider', value: 'scaleValue', suffix: '' },
                     jitterAmount: { slider: 'jitterSlider', value: 'jitterValue', suffix: '' }
                 };
 
@@ -561,6 +561,28 @@
                 this.exportFormatSelect = document.getElementById('exportFormat');
 
                 this.exportBtn.addEventListener('click', this.startExport.bind(this));
+            }
+
+            setupBackgroundVideo() {
+                // Start the background video when it's ready
+                this.backgroundVideo.addEventListener('loadeddata', () => {
+                    console.log('Video loaded successfully, starting playback');
+                    this.backgroundVideo.play();
+                });
+                
+                // Handle video errors
+                this.backgroundVideo.addEventListener('error', (e) => {
+                    console.warn('Background video could not be loaded:', e);
+                });
+                
+                // Log video loading progress
+                this.backgroundVideo.addEventListener('loadstart', () => {
+                    console.log('Video loading started');
+                });
+                
+                this.backgroundVideo.addEventListener('canplay', () => {
+                    console.log('Video can play, ready state:', this.backgroundVideo.readyState);
+                });
             }
 
             startAnimation() {
@@ -593,9 +615,8 @@
                 // Convert elapsed time to seconds
                 const timeInSeconds = elapsed / 1000;
                 
-                // Scale breathing effect (sine wave)
-                const scaleOffset = Math.sin(timeInSeconds * 2) * this.animationSettings.scaleAmount;
-                const scale = 1 + scaleOffset;
+                // Fixed scale (no breathing effect)
+                const scale = 1;
                 
                 // Rotation swaying (sine wave with different frequency)
                 const rotation = Math.sin(timeInSeconds * 1.5) * (this.animationSettings.rotationRange * Math.PI / 180);
@@ -648,33 +669,39 @@
                 
                 // Layer 1: Background paper is already drawn
                 
-                // Layer 2: Torn paper edge texture (animated)
+                // Layer 2: Video inside torn paper area (animated)
                 this.ctx.save();
                 this.ctx.translate(centerX + translateX, centerY + translateY);
                 this.ctx.rotate(rotation);
                 this.ctx.scale(scale, scale);
                 this.ctx.translate(-centerX, -centerY);
                 
-                // Create temporary canvas for masked torn texture
-                const maskedTexture = document.createElement('canvas');
-                maskedTexture.width = this.currentTornPaperTexture.width;
-                maskedTexture.height = this.currentTornPaperTexture.height;
-                const maskedCtx = maskedTexture.getContext('2d');
+                // Create temporary canvas for video with torn mask
+                const videoMaskCanvas = document.createElement('canvas');
+                videoMaskCanvas.width = this.currentImage.width;
+                videoMaskCanvas.height = this.currentImage.height;
+                const videoMaskCtx = videoMaskCanvas.getContext('2d');
                 
-                // Draw torn texture
-                maskedCtx.drawImage(this.currentTornPaperTexture, 0, 0);
+                // Draw video frame
+                if (this.backgroundVideo.readyState >= 2) {
+                    videoMaskCtx.drawImage(this.backgroundVideo, 0, 0, this.currentImage.width, this.currentImage.height);
+                } else {
+                    // Fallback: draw a colored rectangle to show the video area
+                    videoMaskCtx.fillStyle = '#FF0000';
+                    videoMaskCtx.fillRect(0, 0, this.currentImage.width, this.currentImage.height);
+                }
                 
-                // Apply mask to texture
-                maskedCtx.globalCompositeOperation = 'destination-in';
-                maskedCtx.drawImage(this.currentTornEdgeMask, 0, 0);
+                // Apply torn edge mask to video
+                videoMaskCtx.globalCompositeOperation = 'destination-in';
+                videoMaskCtx.drawImage(this.currentTornEdgeMask, 0, 0);
                 
-                // Draw masked texture to main canvas
-                this.ctx.drawImage(maskedTexture, x, y);
+                // Draw masked video to main canvas
+                this.ctx.drawImage(videoMaskCanvas, x, y);
                 
-                // Layer 3: Original image on top (animated)
+                // Layer 4: Original image on top (animated)
                 this.ctx.drawImage(this.currentImage, x, y);
                 
-                // Layer 4: Subtle shadow (animated)
+                // Layer 5: Subtle shadow (animated)
                 this.ctx.globalCompositeOperation = 'multiply';
                 this.ctx.globalAlpha = 0.2;
                 this.ctx.drawImage(this.currentImage, x + 2, y + 2);
