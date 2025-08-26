@@ -446,6 +446,11 @@
                 <span id="jitterValue">1.0</span>
             </div>
             <div class="control-group">
+                <label for="edgeThicknessSlider">Edge Thickness</label>
+                <input type="range" id="edgeThicknessSlider" min="0" max="100" step="1" value="8">
+                <span id="edgeThicknessValue">8px</span>
+            </div>
+            <div class="control-group">
                 <label for="unfoldToggle">Unfold Effect</label>
                 <input type="checkbox" id="unfoldToggle" checked>
                 <span>Enable paper unfolding animation</span>
@@ -517,8 +522,12 @@
                     speed: 1.0,
                     rotationRange: 3,
                     floatDistance: 15,
-                    jitterAmount: 1.0
+                    jitterAmount: 1.0,
+                    edgeThickness: 8
                 };
+                
+                // Debounce timer for edge thickness updates
+                this.edgeThicknessTimer = null;
                 
                 this.init();
             }
@@ -537,7 +546,8 @@
                     speed: { slider: 'speedSlider', value: 'speedValue', suffix: 'x' },
                     rotationRange: { slider: 'rotationSlider', value: 'rotationValue', suffix: '°' },
                     floatDistance: { slider: 'floatSlider', value: 'floatValue', suffix: 'px' },
-                    jitterAmount: { slider: 'jitterSlider', value: 'jitterValue', suffix: '' }
+                    jitterAmount: { slider: 'jitterSlider', value: 'jitterValue', suffix: '' },
+                    edgeThickness: { slider: 'edgeThicknessSlider', value: 'edgeThicknessValue', suffix: 'px' }
                 };
 
                 Object.keys(controls).forEach(setting => {
@@ -548,6 +558,19 @@
                         const value = parseFloat(e.target.value);
                         this.animationSettings[setting] = value;
                         valueSpan.textContent = value + controls[setting].suffix;
+                        
+                        // Debounced update for edge thickness changes
+                        if (setting === 'edgeThickness' && this.currentImage) {
+                            // Clear existing timer
+                            if (this.edgeThicknessTimer) {
+                                clearTimeout(this.edgeThicknessTimer);
+                            }
+                            
+                            // Set new timer for delayed update
+                            this.edgeThicknessTimer = setTimeout(() => {
+                                this.regenerateTornEdges();
+                            }, 300); // 300ms delay
+                        }
                     });
                 });
             }
@@ -561,6 +584,23 @@
                 this.exportFormatSelect = document.getElementById('exportFormat');
 
                 this.exportBtn.addEventListener('click', this.startExport.bind(this));
+            }
+
+            regenerateTornEdges() {
+                if (!this.currentImage) return;
+                
+                // Get current image dimensions
+                const width = this.currentImage.width;
+                const height = this.currentImage.height;
+                
+                // Detect object outline
+                const objectOutline = this.detectObjectOutline(this.currentImage);
+                
+                // Create new torn edge mask with current edge thickness
+                const tornEdgeMask = this.createTornEdgeFromOutline(objectOutline, width, height);
+                
+                // Update the current torn edge mask
+                this.currentTornEdgeMask = tornEdgeMask;
             }
 
             setupBackgroundVideo() {
@@ -866,7 +906,7 @@
                 maskCtx.clearRect(0, 0, width, height);
                 
                 const { outline } = objectOutline;
-                const edgeExpansion = 8; // How far to expand the torn edge
+                const edgeExpansion = this.animationSettings.edgeThickness; // Use edge thickness setting
                 
                 // Create expanded torn edge mask
                 const expandedMask = new Array(width * height).fill(false);
