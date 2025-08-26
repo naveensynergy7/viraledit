@@ -5,60 +5,109 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vintage Paper Effect</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --surface: rgba(255, 255, 255, 0.05);
+            --surface-hover: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --radius: 16px;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
             margin: 0;
             padding: 20px;
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #8B4513, #D2B48C);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            color: var(--text-primary);
+            overflow-x: hidden;
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 30px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            max-width: 800px;
-            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 32px;
         }
 
-        h1 {
-            color: #8B4513;
+        .header {
             text-align: center;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin: 0;
         }
 
         .upload-section {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .file-input-wrapper {
             position: relative;
             display: inline-block;
             cursor: pointer;
-            background: linear-gradient(45deg, #8B4513, #A0522D);
+            background: var(--secondary);
             color: white;
-            padding: 12px 24px;
-            border-radius: 25px;
+            padding: 16px 32px;
+            border-radius: 12px;
             border: none;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 16px rgba(245, 87, 108, 0.3);
+            font-family: inherit;
+            letter-spacing: 0.01em;
+            position: relative;
+            overflow: hidden;
         }
 
         .file-input-wrapper:hover {
-            background: linear-gradient(45deg, #A0522D, #CD853F);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 24px rgba(245, 87, 108, 0.4);
+        }
+
+        .file-input-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .file-input-wrapper:hover::before {
+            left: 100%;
         }
 
         #fileInput {
@@ -70,15 +119,19 @@
         }
 
         .canvas-container {
-            text-align: center;
-            margin-top: 20px;
+            position: relative;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            background: var(--surface);
+            padding: 20px;
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
         }
 
         #canvas {
-            border: 3px solid #8B4513;
-            border-radius: 10px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
             background: #00FF00;
+            border-radius: 12px;
             max-width: 90vw;
             max-height: 50vh;
             width: auto;
@@ -88,101 +141,171 @@
         }
 
         .instructions {
-            background: rgba(139, 69, 19, 0.1);
-            border-left: 4px solid #8B4513;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 5px;
+            width: 100%;
+            max-width: 900px;
+            background: var(--surface);
+            border-left: 4px solid #667eea;
+            padding: 32px;
+            border-radius: var(--radius);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
         }
 
         .instructions h3 {
-            color: #8B4513;
+            color: var(--text-primary);
             margin-top: 0;
+            font-weight: 600;
         }
 
         .instructions ul {
-            color: #5D4037;
+            color: var(--text-secondary);
             line-height: 1.6;
+            margin: 0;
+            padding-left: 20px;
         }
 
         .animation-controls {
-            background: rgba(139, 69, 19, 0.1);
-            border: 2px solid #8B4513;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 900px;
+            padding: 32px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
         }
 
         .animation-controls h3 {
-            color: #8B4513;
+            color: var(--text-primary);
             margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            grid-column: 1 / -1;
         }
 
         .control-group {
             display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .control-group label {
-            color: #5D4037;
-            font-weight: bold;
-            min-width: 120px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.01em;
         }
 
         .control-group input[type="range"] {
-            flex: 1;
-            margin: 0 10px;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--surface-hover);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--secondary);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-group input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--secondary);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
         }
 
         .control-group span {
-            color: #8B4513;
-            font-weight: bold;
-            min-width: 50px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 14px;
         }
 
         .export-section {
-            background: rgba(139, 69, 19, 0.1);
-            border: 2px solid #8B4513;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 900px;
+            padding: 32px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
         }
 
         .export-section h3 {
-            color: #8B4513;
+            color: var(--text-primary);
             margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            grid-column: 1 / -1;
         }
 
         .export-button {
-            background: linear-gradient(45deg, #8B4513, #A0522D);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
+            padding: 16px 32px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: var(--secondary);
+            color: white;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 16px rgba(245, 87, 108, 0.3);
+            font-family: inherit;
+            letter-spacing: 0.01em;
+            position: relative;
+            overflow: hidden;
+            grid-column: 1 / -1;
             margin-top: 15px;
-            width: 100%;
         }
 
         .export-button:hover {
-            background: linear-gradient(45deg, #A0522D, #CD853F);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 24px rgba(245, 87, 108, 0.4);
+        }
+
+        .export-button:active {
+            transform: translateY(0);
         }
 
         .export-button:disabled {
-            background: linear-gradient(45deg, #666, #888);
+            background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%);
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+
+        .export-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .export-button:hover::before {
+            left: 100%;
         }
 
         .export-status {
@@ -190,20 +313,21 @@
             align-items: center;
             gap: 8px;
             padding: 8px 16px;
-            background: rgba(139, 69, 19, 0.1);
+            background: var(--surface);
             border-radius: 8px;
             font-size: 14px;
             font-weight: 500;
             margin-top: 16px;
-            border: 1px solid rgba(139, 69, 19, 0.3);
-            color: #8B4513;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            grid-column: 1 / -1;
         }
 
         .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #4CAF50;
+            background: var(--success);
             animation: pulse 2s infinite;
         }
 
@@ -213,29 +337,80 @@
         }
 
         input[type="number"], select {
-            padding: 8px 12px;
-            border: 1px solid #8B4513;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #5D4037;
+            padding: 12px 16px;
             font-size: 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface);
+            color: var(--text-primary);
             font-family: inherit;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
 
         input[type="number"]:focus, select:focus {
             outline: none;
-            border-color: #A0522D;
-            box-shadow: 0 0 0 2px rgba(160, 82, 45, 0.2);
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        input[type="number"]:hover, select:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: var(--surface-hover);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a0a0a0' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .container > * {
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .container > *:nth-child(2) { animation-delay: 0.1s; }
+        .container > *:nth-child(3) { animation-delay: 0.2s; }
+        .container > *:nth-child(4) { animation-delay: 0.3s; }
+        .container > *:nth-child(5) { animation-delay: 0.4s; }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .animation-controls,
+            .export-section {
+                grid-template-columns: 1fr;
+                padding: 24px;
+            }
+            
+            .export-button {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏛️ Vintage Paper Effect</h1>
+        <div class="header">
+            <h1 class="title">🏛️ Vintage Paper Effect</h1>
+            <p class="subtitle">Transform images into stunning vintage paper animations with torn edges</p>
+        </div>
         
         <div class="upload-section">
             <label for="fileInput" class="file-input-wrapper">
-                📸 Upload PNG Image
+                📸 Upload Image
                 <input type="file" id="fileInput" accept="image/png,image/jpg,image/jpeg,image/gif" />
             </label>
         </div>
@@ -244,46 +419,35 @@
             <canvas id="canvas" width="1920" height="1080"></canvas>
         </div>
 
-        <div class="instructions">
-            <h3>How to use:</h3>
-            <ul>
-                <li>Click "Upload PNG Image" to select an image file</li>
-                <li>The image will be placed on vintage paper with torn edges</li>
-                <li>The effect is applied instantly on the canvas</li>
-                <li>Try different images to see various torn paper effects</li>
-                <li>Adjust animation settings below to customize the floating effect</li>
-            </ul>
-        </div>
-
         <div class="animation-controls">
             <h3>🎬 Animation Controls</h3>
             <div class="control-group">
-                <label>Speed:</label>
+                <label for="speedSlider">Speed</label>
                 <input type="range" id="speedSlider" min="0.5" max="3" step="0.1" value="1">
                 <span id="speedValue">1.0x</span>
             </div>
             <div class="control-group">
-                <label>Rotation (°):</label>
+                <label for="rotationSlider">Rotation (°)</label>
                 <input type="range" id="rotationSlider" min="0" max="10" step="0.5" value="3">
                 <span id="rotationValue">3°</span>
             </div>
             <div class="control-group">
-                <label>Float Distance:</label>
+                <label for="floatSlider">Float Distance</label>
                 <input type="range" id="floatSlider" min="5" max="30" step="1" value="15">
                 <span id="floatValue">15px</span>
             </div>
             <div class="control-group">
-                <label>Scale Amount:</label>
+                <label for="scaleSlider">Scale Amount</label>
                 <input type="range" id="scaleSlider" min="0.02" max="0.15" step="0.01" value="0.05">
                 <span id="scaleValue">0.05</span>
             </div>
             <div class="control-group">
-                <label>Jitter:</label>
+                <label for="jitterSlider">Jitter</label>
                 <input type="range" id="jitterSlider" min="0" max="3" step="0.1" value="1">
                 <span id="jitterValue">1.0</span>
             </div>
             <div class="control-group">
-                <label>Unfold Effect:</label>
+                <label for="unfoldToggle">Unfold Effect</label>
                 <input type="checkbox" id="unfoldToggle" checked>
                 <span>Enable paper unfolding animation</span>
             </div>
@@ -292,19 +456,18 @@
         <div class="export-section">
             <h3>📹 Export Settings</h3>
             <div class="control-group">
-                <label>Duration (seconds):</label>
+                <label for="durationInput">Duration (seconds)</label>
                 <input type="number" id="durationInput" value="5" min="1" max="30" step="0.5">
-                <span>seconds</span>
             </div>
             <div class="control-group">
-                <label>Export Format:</label>
+                <label for="exportFormat">Export Format</label>
                 <select id="exportFormat">
                     <option value="webm">WebM (Fast)</option>
                     <option value="mp4">MP4 (High Quality)</option>
                 </select>
             </div>
             <div class="control-group">
-                <label>Quality:</label>
+                <label for="qualitySelect">Quality</label>
                 <select id="qualitySelect">
                     <option value="high">High Quality (8 Mbps)</option>
                     <option value="medium">Medium Quality (5 Mbps)</option>
@@ -318,6 +481,17 @@
                 <div class="status-dot"></div>
                 <span id="exportStatusText">Ready to export</span>
             </div>
+        </div>
+
+        <div class="instructions">
+            <h3>How to use:</h3>
+            <ul>
+                <li>Click "Upload Image" to select an image file</li>
+                <li>The image will be placed on vintage paper with torn edges</li>
+                <li>The effect is applied instantly on the canvas</li>
+                <li>Try different images to see various torn paper effects</li>
+                <li>Adjust animation settings above to customize the floating effect</li>
+            </ul>
         </div>
     </div>
 
