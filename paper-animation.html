@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vintage Paper Effect</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #8B4513, #D2B48C);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #8B4513;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-size: 2.5em;
+        }
+
+        .upload-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            background: linear-gradient(45deg, #8B4513, #A0522D);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .file-input-wrapper:hover {
+            background: linear-gradient(45deg, #A0522D, #CD853F);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        #fileInput {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .canvas-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #canvas {
+            border: 3px solid #8B4513;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            background: #00FF00;
+            max-width: 90vw;
+            max-height: 50vh;
+            width: auto;
+            height: auto;
+            display: block;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .instructions {
+            background: rgba(139, 69, 19, 0.1);
+            border-left: 4px solid #8B4513;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .instructions h3 {
+            color: #8B4513;
+            margin-top: 0;
+        }
+
+        .instructions ul {
+            color: #5D4037;
+            line-height: 1.6;
+        }
+
+        .animation-controls {
+            background: rgba(139, 69, 19, 0.1);
+            border: 2px solid #8B4513;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .animation-controls h3 {
+            color: #8B4513;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+
+        .control-group label {
+            color: #5D4037;
+            font-weight: bold;
+            min-width: 120px;
+        }
+
+        .control-group input[type="range"] {
+            flex: 1;
+            margin: 0 10px;
+        }
+
+        .control-group span {
+            color: #8B4513;
+            font-weight: bold;
+            min-width: 50px;
+        }
+
+        .export-section {
+            background: rgba(139, 69, 19, 0.1);
+            border: 2px solid #8B4513;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .export-section h3 {
+            color: #8B4513;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .export-button {
+            background: linear-gradient(45deg, #8B4513, #A0522D);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .export-button:hover {
+            background: linear-gradient(45deg, #A0522D, #CD853F);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .export-button:disabled {
+            background: linear-gradient(45deg, #666, #888);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .export-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(139, 69, 19, 0.1);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 16px;
+            border: 1px solid rgba(139, 69, 19, 0.3);
+            color: #8B4513;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        input[type="number"], select {
+            padding: 8px 12px;
+            border: 1px solid #8B4513;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #5D4037;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #A0522D;
+            box-shadow: 0 0 0 2px rgba(160, 82, 45, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏛️ Vintage Paper Effect</h1>
+        
+        <div class="upload-section">
+            <label for="fileInput" class="file-input-wrapper">
+                📸 Upload PNG Image
+                <input type="file" id="fileInput" accept="image/png,image/jpg,image/jpeg,image/gif" />
+            </label>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="canvas" width="1920" height="1080"></canvas>
+        </div>
+
+        <div class="instructions">
+            <h3>How to use:</h3>
+            <ul>
+                <li>Click "Upload PNG Image" to select an image file</li>
+                <li>The image will be placed on vintage paper with torn edges</li>
+                <li>The effect is applied instantly on the canvas</li>
+                <li>Try different images to see various torn paper effects</li>
+                <li>Adjust animation settings below to customize the floating effect</li>
+            </ul>
+        </div>
+
+        <div class="animation-controls">
+            <h3>🎬 Animation Controls</h3>
+            <div class="control-group">
+                <label>Speed:</label>
+                <input type="range" id="speedSlider" min="0.5" max="3" step="0.1" value="1">
+                <span id="speedValue">1.0x</span>
+            </div>
+            <div class="control-group">
+                <label>Rotation (°):</label>
+                <input type="range" id="rotationSlider" min="0" max="10" step="0.5" value="3">
+                <span id="rotationValue">3°</span>
+            </div>
+            <div class="control-group">
+                <label>Float Distance:</label>
+                <input type="range" id="floatSlider" min="5" max="30" step="1" value="15">
+                <span id="floatValue">15px</span>
+            </div>
+            <div class="control-group">
+                <label>Scale Amount:</label>
+                <input type="range" id="scaleSlider" min="0.02" max="0.15" step="0.01" value="0.05">
+                <span id="scaleValue">0.05</span>
+            </div>
+            <div class="control-group">
+                <label>Jitter:</label>
+                <input type="range" id="jitterSlider" min="0" max="3" step="0.1" value="1">
+                <span id="jitterValue">1.0</span>
+            </div>
+            <div class="control-group">
+                <label>Unfold Effect:</label>
+                <input type="checkbox" id="unfoldToggle" checked>
+                <span>Enable paper unfolding animation</span>
+            </div>
+        </div>
+
+        <div class="export-section">
+            <h3>📹 Export Settings</h3>
+            <div class="control-group">
+                <label>Duration (seconds):</label>
+                <input type="number" id="durationInput" value="5" min="1" max="30" step="0.5">
+                <span>seconds</span>
+            </div>
+            <div class="control-group">
+                <label>Quality:</label>
+                <select id="qualitySelect">
+                    <option value="high">High Quality (8 Mbps)</option>
+                    <option value="medium">Medium Quality (5 Mbps)</option>
+                    <option value="low">Low Quality (3 Mbps)</option>
+                </select>
+            </div>
+            <button id="exportBtn" class="export-button">
+                <span>🎬 Export Animation</span>
+            </button>
+            <div id="exportStatus" class="export-status" style="display: none;">
+                <div class="status-dot"></div>
+                <span id="exportStatusText">Ready to export</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class VintagePaperEffect {
+            constructor() {
+                this.canvas = document.getElementById('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.fileInput = document.getElementById('fileInput');
+                this.paperTexture = null;
+                
+                // Animation properties
+                this.animationId = null;
+                this.startTime = Date.now();
+                this.currentImage = null;
+                this.currentTornEdgeMask = null;
+                this.currentTornPaperTexture = null;
+                this.imagePosition = { x: 0, y: 0 };
+                
+                // Animation settings
+                this.animationSettings = {
+                    speed: 1.0,
+                    rotationRange: 3,
+                    floatDistance: 15,
+                    scaleAmount: 0.05,
+                    jitterAmount: 1.0
+                };
+                
+                this.init();
+            }
+
+            init() {
+                this.fileInput.addEventListener('change', this.handleFileUpload.bind(this));
+                this.createPaperTexture();
+                this.setupAnimationControls();
+                this.setupExportControls();
+                this.drawInitialState();
+            }
+
+            setupAnimationControls() {
+                const controls = {
+                    speed: { slider: 'speedSlider', value: 'speedValue', suffix: 'x' },
+                    rotationRange: { slider: 'rotationSlider', value: 'rotationValue', suffix: '°' },
+                    floatDistance: { slider: 'floatSlider', value: 'floatValue', suffix: 'px' },
+                    scaleAmount: { slider: 'scaleSlider', value: 'scaleValue', suffix: '' },
+                    jitterAmount: { slider: 'jitterSlider', value: 'jitterValue', suffix: '' }
+                };
+
+                Object.keys(controls).forEach(setting => {
+                    const slider = document.getElementById(controls[setting].slider);
+                    const valueSpan = document.getElementById(controls[setting].value);
+                    
+                    slider.addEventListener('input', (e) => {
+                        const value = parseFloat(e.target.value);
+                        this.animationSettings[setting] = value;
+                        valueSpan.textContent = value + controls[setting].suffix;
+                    });
+                });
+            }
+
+            setupExportControls() {
+                this.exportBtn = document.getElementById('exportBtn');
+                this.exportStatus = document.getElementById('exportStatus');
+                this.exportStatusText = document.getElementById('exportStatusText');
+                this.durationInput = document.getElementById('durationInput');
+                this.qualitySelect = document.getElementById('qualitySelect');
+
+                this.exportBtn.addEventListener('click', this.startExport.bind(this));
+            }
+
+            startAnimation() {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+                this.startTime = Date.now();
+                this.animate();
+            }
+
+            stopAnimation() {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            }
+
+            animate() {
+                const currentTime = Date.now();
+                const elapsed = (currentTime - this.startTime) * this.animationSettings.speed;
+                
+                if (this.currentImage) {
+                    this.renderAnimatedFrame(elapsed);
+                }
+                
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+
+            calculateTransforms(elapsed) {
+                // Convert elapsed time to seconds
+                const timeInSeconds = elapsed / 1000;
+                
+                // Scale breathing effect (sine wave)
+                const scaleOffset = Math.sin(timeInSeconds * 2) * this.animationSettings.scaleAmount;
+                const scale = 1 + scaleOffset;
+                
+                // Rotation swaying (sine wave with different frequency)
+                const rotation = Math.sin(timeInSeconds * 1.5) * (this.animationSettings.rotationRange * Math.PI / 180);
+                
+                // Vertical float (sine wave)
+                const floatOffset = Math.sin(timeInSeconds * 1.2) * this.animationSettings.floatDistance;
+                
+                // Organic jitter (multiple sine waves with different frequencies)
+                const jitterX = (Math.sin(timeInSeconds * 3.7) + Math.sin(timeInSeconds * 5.1) * 0.5) 
+                    * this.animationSettings.jitterAmount;
+                const jitterY = (Math.cos(timeInSeconds * 4.3) + Math.cos(timeInSeconds * 6.2) * 0.5) 
+                    * this.animationSettings.jitterAmount;
+                
+                return {
+                    scale,
+                    rotation,
+                    translateX: jitterX,
+                    translateY: floatOffset + jitterY
+                };
+            }
+
+            renderAnimatedFrame(elapsed) {
+                // Enable high-quality rendering
+                this.ctx.imageSmoothingEnabled = true;
+                this.ctx.imageSmoothingQuality = 'high';
+                
+                // Clear canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Draw green screen background
+                this.ctx.fillStyle = '#00FF00';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                if (!this.currentImage) return;
+
+                // Calculate transforms
+                const transforms = this.calculateTransforms(elapsed);
+                
+                // Apply transforms and render layers
+                this.renderAnimatedLayers(transforms);
+            }
+
+            renderAnimatedLayers(transforms) {
+                const { scale, rotation, translateX, translateY } = transforms;
+                const { x, y } = this.imagePosition;
+                
+                // Calculate center point for rotation and scaling
+                const centerX = x + this.currentImage.width / 2;
+                const centerY = y + this.currentImage.height / 2;
+                
+                // Layer 1: Background paper is already drawn
+                
+                // Layer 2: Torn paper edge texture (animated)
+                this.ctx.save();
+                this.ctx.translate(centerX + translateX, centerY + translateY);
+                this.ctx.rotate(rotation);
+                this.ctx.scale(scale, scale);
+                this.ctx.translate(-centerX, -centerY);
+                
+                // Create temporary canvas for masked torn texture
+                const maskedTexture = document.createElement('canvas');
+                maskedTexture.width = this.currentTornPaperTexture.width;
+                maskedTexture.height = this.currentTornPaperTexture.height;
+                const maskedCtx = maskedTexture.getContext('2d');
+                
+                // Draw torn texture
+                maskedCtx.drawImage(this.currentTornPaperTexture, 0, 0);
+                
+                // Apply mask to texture
+                maskedCtx.globalCompositeOperation = 'destination-in';
+                maskedCtx.drawImage(this.currentTornEdgeMask, 0, 0);
+                
+                // Draw masked texture to main canvas
+                this.ctx.drawImage(maskedTexture, x, y);
+                
+                // Layer 3: Original image on top (animated)
+                this.ctx.drawImage(this.currentImage, x, y);
+                
+                // Layer 4: Subtle shadow (animated)
+                this.ctx.globalCompositeOperation = 'multiply';
+                this.ctx.globalAlpha = 0.2;
+                this.ctx.drawImage(this.currentImage, x + 2, y + 2);
+                
+                this.ctx.restore();
+            }
+
+            createPaperTexture() {
+                // Create vintage paper texture using canvas
+                const textureCanvas = document.createElement('canvas');
+                textureCanvas.width = this.canvas.width;
+                textureCanvas.height = this.canvas.height;
+                const textureCtx = textureCanvas.getContext('2d');
+
+                // Base paper color with gradient
+                const gradient = textureCtx.createLinearGradient(0, 0, textureCanvas.width, textureCanvas.height);
+                gradient.addColorStop(0, '#F4E4BC');
+                gradient.addColorStop(0.5, '#E8D5B7');
+                gradient.addColorStop(1, '#D2B48C');
+                
+                textureCtx.fillStyle = gradient;
+                textureCtx.fillRect(0, 0, textureCanvas.width, textureCanvas.height);
+
+                // Add paper texture noise
+                const imageData = textureCtx.getImageData(0, 0, textureCanvas.width, textureCanvas.height);
+                const data = imageData.data;
+
+                for (let i = 0; i < data.length; i += 4) {
+                    const noise = (Math.random() - 0.5) * 30;
+                    data[i] = Math.max(0, Math.min(255, data[i] + noise));     // Red
+                    data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise)); // Green
+                    data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise)); // Blue
+                }
+
+                textureCtx.putImageData(imageData, 0, 0);
+
+                // Add aging spots and stains
+                for (let i = 0; i < 50; i++) {
+                    const x = Math.random() * textureCanvas.width;
+                    const y = Math.random() * textureCanvas.height;
+                    const radius = Math.random() * 8 + 2;
+                    
+                    textureCtx.globalAlpha = Math.random() * 0.3 + 0.1;
+                    textureCtx.fillStyle = '#8B4513';
+                    textureCtx.beginPath();
+                    textureCtx.arc(x, y, radius, 0, Math.PI * 2);
+                    textureCtx.fill();
+                }
+
+                textureCtx.globalAlpha = 1;
+                this.paperTexture = textureCanvas;
+            }
+
+
+
+            handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        this.processImage(img);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            processImage(img) {
+                // Stop any existing animation
+                this.stopAnimation();
+
+                // Calculate image dimensions to fit canvas while maintaining aspect ratio
+                // Use larger dimensions for better quality
+                const maxWidth = this.canvas.width * 0.6;
+                const maxHeight = this.canvas.height * 0.6;
+                
+                let { width, height } = this.calculateImageDimensions(img, maxWidth, maxHeight);
+                
+                const x = (this.canvas.width - width) / 2;
+                const y = (this.canvas.height - height) / 2;
+
+                // Step 1: Create image canvas with proper alpha and high quality
+                const imageCanvas = document.createElement('canvas');
+                imageCanvas.width = width;
+                imageCanvas.height = height;
+                const imageCtx = imageCanvas.getContext('2d');
+                
+                // Enable high-quality rendering for image processing
+                imageCtx.imageSmoothingEnabled = true;
+                imageCtx.imageSmoothingQuality = 'high';
+                
+                imageCtx.drawImage(img, 0, 0, width, height);
+
+                // Step 2: Detect alpha channel and create object outline
+                const objectOutline = this.detectObjectOutline(imageCanvas);
+
+                // Step 3: Create torn paper edge mask around the object
+                const tornEdgeMask = this.createTornEdgeFromOutline(objectOutline, width, height);
+
+                // Step 4: Create torn paper texture for edges
+                const tornPaperTexture = this.createTornPaperTexture(width, height);
+
+                // Store current image data for animation
+                this.currentImage = imageCanvas;
+                this.currentTornEdgeMask = tornEdgeMask;
+                this.currentTornPaperTexture = tornPaperTexture;
+                this.imagePosition = { x, y };
+
+                // Start animation
+                this.startAnimation();
+            }
+
+            detectObjectOutline(imageCanvas) {
+                const ctx = imageCanvas.getContext('2d');
+                const imageData = ctx.getImageData(0, 0, imageCanvas.width, imageCanvas.height);
+                const data = imageData.data;
+                const width = imageCanvas.width;
+                const height = imageCanvas.height;
+                
+                // Create outline map - true where pixels are on the edge of opaque areas
+                const outline = new Array(width * height).fill(false);
+                
+                for (let y = 1; y < height - 1; y++) {
+                    for (let x = 1; x < width - 1; x++) {
+                        const index = (y * width + x) * 4;
+                        const alpha = data[index + 3]; // Alpha channel
+                        
+                        // If this pixel is opaque or semi-opaque
+                        if (alpha > 50) {
+                            // Check if any neighboring pixel is transparent (edge detection)
+                            const neighbors = [
+                                data[((y-1) * width + x) * 4 + 3],     // top
+                                data[((y+1) * width + x) * 4 + 3],     // bottom
+                                data[(y * width + (x-1)) * 4 + 3],     // left
+                                data[(y * width + (x+1)) * 4 + 3],     // right
+                                data[((y-1) * width + (x-1)) * 4 + 3], // top-left
+                                data[((y-1) * width + (x+1)) * 4 + 3], // top-right
+                                data[((y+1) * width + (x-1)) * 4 + 3], // bottom-left
+                                data[((y+1) * width + (x+1)) * 4 + 3]  // bottom-right
+                            ];
+                            
+                            // If any neighbor is transparent, this is an edge pixel
+                            const isEdge = neighbors.some(neighborAlpha => neighborAlpha <= 50);
+                            outline[y * width + x] = isEdge;
+                        }
+                    }
+                }
+                
+                return { outline, width, height };
+            }
+
+            createTornEdgeFromOutline(objectOutline, width, height) {
+                const maskCanvas = document.createElement('canvas');
+                maskCanvas.width = width;
+                maskCanvas.height = height;
+                const maskCtx = maskCanvas.getContext('2d');
+                
+                // Start with transparent mask
+                maskCtx.clearRect(0, 0, width, height);
+                
+                const { outline } = objectOutline;
+                const edgeExpansion = 8; // How far to expand the torn edge
+                
+                // Create expanded torn edge mask
+                const expandedMask = new Array(width * height).fill(false);
+                
+                // For each outline pixel, create a torn edge expansion
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const index = y * width + x;
+                        if (outline[index]) {
+                            // Apply torn edge effect around this outline pixel
+                            this.expandOutlinePixel(expandedMask, x, y, width, height, edgeExpansion);
+                        }
+                    }
+                }
+                
+                // Convert expanded mask to canvas
+                maskCtx.fillStyle = 'white';
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        if (expandedMask[y * width + x]) {
+                            maskCtx.fillRect(x, y, 1, 1);
+                        }
+                    }
+                }
+                
+                return maskCanvas;
+            }
+
+            expandOutlinePixel(expandedMask, centerX, centerY, width, height, maxExpansion) {
+                // Create more jagged, irregular torn expansion like in the reference image
+                const steps = 24; // Fewer steps for more jagged look
+                
+                for (let i = 0; i < steps; i++) {
+                    const angle = (i / steps) * Math.PI * 2;
+                    
+                    // More aggressive random variations for jagged edges
+                    const baseExpansion = maxExpansion * 0.8;
+                    const noise1 = Math.sin(angle * 4 + centerX * 0.15) * 3;
+                    const noise2 = Math.cos(angle * 6 + centerY * 0.15) * 3;
+                    const randomNoise = (Math.random() - 0.5) * 8; // More random variation
+                    const expansion = Math.max(2, baseExpansion + noise1 + noise2 + randomNoise);
+                    
+                    // Create jagged tears with varying intensity
+                    const jaggedSteps = Math.ceil(expansion * 1.2);
+                    for (let j = 0; j <= jaggedSteps; j++) {
+                        const progress = j / jaggedSteps;
+                        let currentExpansion = expansion * progress;
+                        
+                        // Add micro-jitter for more realistic paper tear
+                        const microJitter = (Math.random() - 0.5) * 2;
+                        currentExpansion += microJitter;
+                        
+                        const x = Math.round(centerX + Math.cos(angle) * currentExpansion);
+                        const y = Math.round(centerY + Math.sin(angle) * currentExpansion);
+                        
+                        if (x >= 0 && x < width && y >= 0 && y < height) {
+                            expandedMask[y * width + x] = true;
+                            
+                            // Add surrounding pixels for thicker torn edge
+                            for (let dx = -1; dx <= 1; dx++) {
+                                for (let dy = -1; dy <= 1; dy++) {
+                                    const nx = x + dx;
+                                    const ny = y + dy;
+                                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                                        if (Math.random() > 0.3) { // 70% chance to fill surrounding
+                                            expandedMask[ny * width + nx] = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            createTornPaperTexture(width, height) {
+                const textureCanvas = document.createElement('canvas');
+                textureCanvas.width = width;
+                textureCanvas.height = height;
+                const textureCtx = textureCanvas.getContext('2d');
+                
+                // Enable high-quality rendering for texture creation
+                textureCtx.imageSmoothingEnabled = true;
+                textureCtx.imageSmoothingQuality = 'high';
+
+                // Create white/cream paper texture like in the image
+                const gradient = textureCtx.createRadialGradient(
+                    width/2, height/2, 0,
+                    width/2, height/2, Math.max(width, height)/2
+                );
+                gradient.addColorStop(0, '#FFFFFF');
+                gradient.addColorStop(0.3, '#F8F8F8');
+                gradient.addColorStop(0.7, '#F0F0F0');
+                gradient.addColorStop(1, '#E8E8E8');
+                
+                textureCtx.fillStyle = gradient;
+                textureCtx.fillRect(0, 0, width, height);
+
+                // Add subtle paper fiber texture
+                const imageData = textureCtx.getImageData(0, 0, width, height);
+                const data = imageData.data;
+
+                for (let i = 0; i < data.length; i += 4) {
+                    const noise = (Math.random() - 0.5) * 15; // Reduced noise for cleaner look
+                    data[i] = Math.max(0, Math.min(255, data[i] + noise));     // Red
+                    data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise)); // Green
+                    data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise)); // Blue
+                }
+
+                textureCtx.putImageData(imageData, 0, 0);
+
+                // Add very subtle gray shadows near edges for depth
+                textureCtx.globalAlpha = 0.1;
+                textureCtx.fillStyle = '#CCCCCC';
+                
+                // Add subtle edge shadows
+                for (let i = 0; i < 8; i++) {
+                    const x = Math.random() * width;
+                    const y = Math.random() * height;
+                    const radius = Math.random() * 3 + 1;
+                    
+                    textureCtx.beginPath();
+                    textureCtx.arc(x, y, radius, 0, Math.PI * 2);
+                    textureCtx.fill();
+                }
+
+                textureCtx.globalAlpha = 1;
+                return textureCanvas;
+            }
+
+            renderLayers(imageCanvas, tornEdgeMask, tornPaperTexture, x, y) {
+                // Layer 1: Background paper is already drawn
+                
+                // Layer 2: Torn paper edge texture where the mask is
+                this.ctx.save();
+                this.ctx.globalCompositeOperation = 'source-over';
+                
+                // Create temporary canvas for masked torn texture
+                const maskedTexture = document.createElement('canvas');
+                maskedTexture.width = tornPaperTexture.width;
+                maskedTexture.height = tornPaperTexture.height;
+                const maskedCtx = maskedTexture.getContext('2d');
+                
+                // Draw torn texture
+                maskedCtx.drawImage(tornPaperTexture, 0, 0);
+                
+                // Apply mask to texture
+                maskedCtx.globalCompositeOperation = 'destination-in';
+                maskedCtx.drawImage(tornEdgeMask, 0, 0);
+                
+                // Draw masked texture to main canvas
+                this.ctx.drawImage(maskedTexture, x, y);
+                
+                // Layer 3: Original image on top
+                this.ctx.drawImage(imageCanvas, x, y);
+                
+                // Layer 4: Subtle shadow
+                this.ctx.globalCompositeOperation = 'multiply';
+                this.ctx.globalAlpha = 0.2;
+                this.ctx.drawImage(imageCanvas, x + 2, y + 2);
+                
+                this.ctx.restore();
+            }
+
+
+
+            calculateImageDimensions(img, maxWidth, maxHeight) {
+                let { width, height } = img;
+                
+                // Scale down if necessary
+                if (width > maxWidth || height > maxHeight) {
+                    const scale = Math.min(maxWidth / width, maxHeight / height);
+                    width *= scale;
+                    height *= scale;
+                }
+                
+                return { width, height };
+            }
+
+            drawInitialState() {
+                // Enable high-quality rendering
+                this.ctx.imageSmoothingEnabled = true;
+                this.ctx.imageSmoothingQuality = 'high';
+                
+                // Clear canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw green screen background
+                this.ctx.fillStyle = '#00FF00';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Add instruction text with better quality
+                this.ctx.fillStyle = '#FFFFFF';
+                this.ctx.font = 'bold 48px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.strokeStyle = '#000000';
+                this.ctx.lineWidth = 4;
+                this.ctx.strokeText('Upload an image to see the vintage paper effect!', 
+                    this.canvas.width / 2, this.canvas.height / 2);
+                this.ctx.fillText('Upload an image to see the vintage paper effect!', 
+                    this.canvas.width / 2, this.canvas.height / 2);
+            }
+
+            destroy() {
+                this.stopAnimation();
+                // Clean up event listeners if needed
+            }
+
+            updateExportStatus(message, show = true) {
+                this.exportStatusText.textContent = message;
+                this.exportStatus.style.display = show ? 'inline-flex' : 'none';
+            }
+
+            startExport() {
+                if (!this.currentImage) {
+                    alert('Please upload an image first before exporting');
+                    return;
+                }
+
+                const duration = parseFloat(this.durationInput.value);
+                if (isNaN(duration) || duration <= 0) {
+                    alert('Please enter a valid duration');
+                    return;
+                }
+
+                // Disable export button during recording
+                this.exportBtn.disabled = true;
+                this.exportBtn.innerHTML = '<span>🔴 Recording...</span>';
+                this.updateExportStatus('Initializing recording...');
+
+                // Capture canvas stream with high quality settings
+                let stream = this.canvas.captureStream(60); // 60fps
+
+                // Get quality settings
+                const quality = this.qualitySelect.value;
+                let options = {
+                    mimeType: 'video/webm;codecs=vp9',
+                    videoBitsPerSecond: quality === 'high' ? 8000000 : quality === 'medium' ? 5000000 : 3000000
+                };
+
+                // Fallback to VP8 if VP9 is not supported
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options = {
+                        mimeType: 'video/webm;codecs=vp8',
+                        videoBitsPerSecond: quality === 'high' ? 5000000 : quality === 'medium' ? 3000000 : 2000000
+                    };
+                }
+
+                // Final fallback to default webm
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options = {
+                        mimeType: 'video/webm',
+                        videoBitsPerSecond: quality === 'high' ? 3000000 : quality === 'medium' ? 2000000 : 1000000
+                    };
+                }
+
+                let recorder = new MediaRecorder(stream, options);
+                let chunks = [];
+
+                recorder.ondataavailable = e => chunks.push(e.data);
+                recorder.onstop = () => {
+                    this.updateExportStatus('Processing video...');
+                    let blob = new Blob(chunks, { type: 'video/webm' });
+                    let url = URL.createObjectURL(blob);
+                    let a = document.createElement('a');
+                    a.href = url;
+                    a.download = `vintage-paper-animation-${Date.now()}.webm`;
+                    a.click();
+
+                    // Re-enable export button
+                    this.exportBtn.disabled = false;
+                    this.exportBtn.innerHTML = '<span>🎬 Export Animation</span>';
+                    this.updateExportStatus('Video exported successfully! ✨');
+                    setTimeout(() => this.updateExportStatus('', false), 3000);
+                };
+
+                recorder.start();
+                this.updateExportStatus(`Recording animation (${duration}s)`);
+
+                // Start the animation for the specified duration
+                const startTime = Date.now();
+                const durationMs = duration * 1000;
+
+                // Ensure animation is running
+                if (!this.animationId) {
+                    this.startAnimation();
+                }
+
+                // Stop recording after duration
+                setTimeout(() => {
+                    this.updateExportStatus('Finishing recording...');
+                    recorder.stop();
+                }, durationMs);
+            }
+        }
+
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new VintagePaperEffect();
+        });
+    </script>
+</body>
+</html>
