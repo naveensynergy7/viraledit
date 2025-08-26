@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Number Animation Studio</title>
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/ffmpeg.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/util.min.js"></script>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
@@ -321,6 +320,14 @@
         <label for="textColor">Text Color</label>
         <input type="color" id="textColor" value="#ffffff">
       </div>
+      
+      <div class="control-group">
+        <label for="exportFormat">Export Format</label>
+        <select id="exportFormat">
+          <option value="webm">WebM (Fast)</option>
+          <option value="mp4">MP4 (High Quality)</option>
+        </select>
+      </div>
     </div>
     
     <button id="startBtn" class="main-button">
@@ -342,6 +349,7 @@
     const durationInput = document.getElementById("duration");
     const fontStyleSelect = document.getElementById("fontStyle");
     const textColorInput = document.getElementById("textColor");
+    const exportFormatSelect = document.getElementById("exportFormat");
     const statusIndicator = document.getElementById("statusIndicator");
     const statusText = document.getElementById("statusText");
 
@@ -469,25 +477,55 @@
       // Capture canvas stream with high quality settings
       let stream = canvas.captureStream(60); // 60fps
       
-      // Try different codec options for better quality
-      let options = {
-        mimeType: 'video/webm;codecs=vp9',
-        videoBitsPerSecond: 8000000 // 8 Mbps for high quality
-      };
+      // Get export format preference
+      const exportFormat = exportFormatSelect.value;
       
-      // Fallback to VP8 if VP9 is not supported
-      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        options = {
-          mimeType: 'video/webm;codecs=vp8',
-          videoBitsPerSecond: 5000000 // 5 Mbps
-        };
+      // Try different codec options based on format preference
+      let options = {};
+      
+      if (exportFormat === "mp4") {
+        // Try MP4 codecs first
+        const mp4Codecs = [
+          'video/mp4;codecs=h264',
+          'video/mp4',
+          'video/webm;codecs=h264'
+        ];
+        
+        for (const codec of mp4Codecs) {
+          if (MediaRecorder.isTypeSupported(codec)) {
+            options = {
+              mimeType: codec,
+              videoBitsPerSecond: 8000000 // 8 Mbps for high quality
+            };
+            break;
+          }
+        }
       }
       
-      // Final fallback to default webm
-      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+      // Fallback to WebM if MP4 not supported or WebM preferred
+      if (!options.mimeType) {
+        const webmCodecs = [
+          'video/webm;codecs=vp9',
+          'video/webm;codecs=vp8',
+          'video/webm'
+        ];
+        
+        for (const codec of webmCodecs) {
+          if (MediaRecorder.isTypeSupported(codec)) {
+            options = {
+              mimeType: codec,
+              videoBitsPerSecond: exportFormat === "mp4" ? 8000000 : 5000000
+            };
+            break;
+          }
+        }
+      }
+      
+      // Final fallback
+      if (!options.mimeType) {
         options = {
           mimeType: 'video/webm',
-          videoBitsPerSecond: 3000000 // 3 Mbps
+          videoBitsPerSecond: 3000000
         };
       }
       
@@ -495,14 +533,19 @@
       let chunks = [];
 
       recorder.ondataavailable = e => chunks.push(e.data);
-      recorder.onstop = () => {
+      recorder.onstop = async () => {
         updateStatus("Processing video...");
         let blob = new Blob(chunks, { type: "video/webm" });
-        let url = URL.createObjectURL(blob);
-        let a = document.createElement("a");
-        a.href = url;
-        a.download = `number-animation-${startNum}-to-${endNum}-HD.webm`;
-        a.click();
+        
+        const exportFormat = exportFormatSelect.value;
+        
+        // Determine file extension based on the actual mime type
+        const mimeType = recorder.mimeType || 'video/webm';
+        const isMP4 = mimeType.includes('mp4') || mimeType.includes('h264');
+        const fileExtension = isMP4 ? 'mp4' : 'webm';
+        const fileName = `number-animation-${startNum}-to-${endNum}-HD.${fileExtension}`;
+        
+        downloadVideo(blob, fileName);
         
         // Re-enable button
         startBtn.disabled = false;
@@ -546,6 +589,18 @@
       setTimeout(previewNumber, 300); // Debounce for input
     });
     
+    // Helper function to download video
+    function downloadVideo(blob, filename) {
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+
+
     // Show welcome status
     updateStatus("Ready to create amazing animations! 🚀");
     setTimeout(() => updateStatus("", false), 3000);

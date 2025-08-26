@@ -297,6 +297,13 @@
                 <span>seconds</span>
             </div>
             <div class="control-group">
+                <label>Export Format:</label>
+                <select id="exportFormat">
+                    <option value="webm">WebM (Fast)</option>
+                    <option value="mp4">MP4 (High Quality)</option>
+                </select>
+            </div>
+            <div class="control-group">
                 <label>Quality:</label>
                 <select id="qualitySelect">
                     <option value="high">High Quality (8 Mbps)</option>
@@ -377,6 +384,7 @@
                 this.exportStatusText = document.getElementById('exportStatusText');
                 this.durationInput = document.getElementById('durationInput');
                 this.qualitySelect = document.getElementById('qualitySelect');
+                this.exportFormatSelect = document.getElementById('exportFormat');
 
                 this.exportBtn.addEventListener('click', this.startExport.bind(this));
             }
@@ -891,23 +899,55 @@
                 // Capture canvas stream with high quality settings
                 let stream = this.canvas.captureStream(60); // 60fps
 
-                // Get quality settings
+                // Get export format and quality settings
+                const exportFormat = this.exportFormatSelect.value;
                 const quality = this.qualitySelect.value;
-                let options = {
-                    mimeType: 'video/webm;codecs=vp9',
-                    videoBitsPerSecond: quality === 'high' ? 8000000 : quality === 'medium' ? 5000000 : 3000000
-                };
-
-                // Fallback to VP8 if VP9 is not supported
-                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-                    options = {
-                        mimeType: 'video/webm;codecs=vp8',
-                        videoBitsPerSecond: quality === 'high' ? 5000000 : quality === 'medium' ? 3000000 : 2000000
-                    };
+                
+                // Try different codec options based on format preference
+                let options = {};
+                
+                if (exportFormat === "mp4") {
+                    // Try MP4 codecs first
+                    const mp4Codecs = [
+                        'video/mp4;codecs=h264',
+                        'video/mp4',
+                        'video/webm;codecs=h264'
+                    ];
+                    
+                    for (const codec of mp4Codecs) {
+                        if (MediaRecorder.isTypeSupported(codec)) {
+                            options = {
+                                mimeType: codec,
+                                videoBitsPerSecond: quality === 'high' ? 8000000 : quality === 'medium' ? 5000000 : 3000000
+                            };
+                            break;
+                        }
+                    }
                 }
-
-                // Final fallback to default webm
-                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                
+                // Fallback to WebM if MP4 not supported or WebM preferred
+                if (!options.mimeType) {
+                    const webmCodecs = [
+                        'video/webm;codecs=vp9',
+                        'video/webm;codecs=vp8',
+                        'video/webm'
+                    ];
+                    
+                    for (const codec of webmCodecs) {
+                        if (MediaRecorder.isTypeSupported(codec)) {
+                            options = {
+                                mimeType: codec,
+                                videoBitsPerSecond: exportFormat === "mp4" ? 
+                                    (quality === 'high' ? 8000000 : quality === 'medium' ? 5000000 : 3000000) :
+                                    (quality === 'high' ? 5000000 : quality === 'medium' ? 3000000 : 2000000)
+                            };
+                            break;
+                        }
+                    }
+                }
+                
+                // Final fallback
+                if (!options.mimeType) {
                     options = {
                         mimeType: 'video/webm',
                         videoBitsPerSecond: quality === 'high' ? 3000000 : quality === 'medium' ? 2000000 : 1000000
@@ -921,11 +961,19 @@
                 recorder.onstop = () => {
                     this.updateExportStatus('Processing video...');
                     let blob = new Blob(chunks, { type: 'video/webm' });
+                    
+                    // Determine file extension based on the actual mime type
+                    const mimeType = recorder.mimeType || 'video/webm';
+                    const isMP4 = mimeType.includes('mp4') || mimeType.includes('h264');
+                    const fileExtension = isMP4 ? 'mp4' : 'webm';
+                    const fileName = `vintage-paper-animation-${Date.now()}.${fileExtension}`;
+                    
                     let url = URL.createObjectURL(blob);
                     let a = document.createElement('a');
                     a.href = url;
-                    a.download = `vintage-paper-animation-${Date.now()}.webm`;
+                    a.download = fileName;
                     a.click();
+                    URL.revokeObjectURL(url);
 
                     // Re-enable export button
                     this.exportBtn.disabled = false;
