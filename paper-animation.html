@@ -664,7 +664,7 @@
             }
 
             renderAnimatedLayers(transforms) {
-                const { scale, rotation, translateX, translateY } = transforms;
+                const { scale, rotation, translateX, translateY, alpha } = transforms;
                 const { x, y } = this.imagePosition;
                 
                 // Calculate center point for rotation and scaling
@@ -673,7 +673,35 @@
                 
                 // Layer 1: Background paper is already drawn
                 
-                // Layer 2: Video inside torn paper area (animated)
+                // Layer 2: Torn paper edge texture (animated)
+                this.ctx.save();
+                this.ctx.globalAlpha = alpha;
+                this.ctx.translate(centerX + translateX, centerY + translateY);
+                this.ctx.rotate(rotation);
+                this.ctx.scale(scale, scale);
+                this.ctx.translate(-centerX, -centerY);
+                
+                // Create torn paper texture for edges
+                const tornPaperTexture = this.createTornPaperTexture(this.currentImage.width, this.currentImage.height);
+                
+                // Create temporary canvas for masked torn texture
+                const maskedTexture = document.createElement('canvas');
+                maskedTexture.width = tornPaperTexture.width;
+                maskedTexture.height = tornPaperTexture.height;
+                const maskedCtx = maskedTexture.getContext('2d');
+                
+                // Draw torn texture
+                maskedCtx.drawImage(tornPaperTexture, 0, 0);
+                
+                // Apply mask to texture
+                maskedCtx.globalCompositeOperation = 'destination-in';
+                maskedCtx.drawImage(this.currentTornEdgeMask, 0, 0);
+                
+                // Draw masked texture to main canvas
+                this.ctx.drawImage(maskedTexture, x, y);
+                this.ctx.restore();
+                
+                // Layer 3: Video inside torn paper area (animated)
                 this.ctx.save();
                 this.ctx.translate(centerX + translateX, centerY + translateY);
                 this.ctx.rotate(rotation);
