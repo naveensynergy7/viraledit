@@ -45,8 +45,8 @@
 
         .input-section {
             width: 100%;
-            max-width: 900px;
-            padding: 32px;
+            max-width: 1000px;
+            padding: 40px;
             background: var(--surface);
             border-radius: var(--radius);
             backdrop-filter: blur(20px);
@@ -99,11 +99,14 @@
             overflow: hidden;
             box-shadow: var(--shadow);
             background: var(--surface);
-            padding: 0 20px; /* Reduced top/bottom padding to 0 */
+            padding: 20px;
             backdrop-filter: blur(20px);
             border: 1px solid var(--border);
             width: 100%;
-            max-width: 900px;
+            max-width: 1000px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         #canvas {
@@ -123,11 +126,11 @@
 
         .controls {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
             width: 100%;
-            max-width: 900px;
-            padding: 32px;
+            max-width: 1000px;
+            padding: 40px;
             background: var(--surface);
             border-radius: var(--radius);
             backdrop-filter: blur(20px);
@@ -146,7 +149,8 @@
         .control-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 12px;
+            align-items: flex-start;
         }
 
         .control-group label {
@@ -154,6 +158,8 @@
             font-weight: 600;
             font-size: 14px;
             letter-spacing: 0.01em;
+            margin-bottom: 4px;
+            width: 100%;
         }
 
         input[type="color"] {
@@ -165,6 +171,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             overflow: hidden;
+            align-self: flex-start;
         }
 
         input[type="color"]:hover {
@@ -189,6 +196,7 @@
             background-repeat: no-repeat;
             background-size: 16px;
             padding-right: 40px;
+            width: 100%;
         }
 
         select:focus {
@@ -211,6 +219,7 @@
             outline: none;
             -webkit-appearance: none;
             appearance: none;
+            margin: 8px 0;
         }
 
         input[type="range"]::-webkit-slider-thumb {
@@ -238,6 +247,8 @@
             color: var(--text-secondary);
             font-weight: 500;
             font-size: 14px;
+            margin-top: 4px;
+            align-self: flex-start;
         }
 
         input[type="checkbox"] {
@@ -248,7 +259,7 @@
         }
 
         .export-button {
-            padding: 16px 32px;
+            padding: 18px 36px;
             font-size: 16px;
             font-weight: 600;
             border: none;
@@ -263,7 +274,9 @@
             position: relative;
             overflow: hidden;
             grid-column: 1 / -1;
-            margin-top: 15px;
+            margin-top: 20px;
+            justify-self: center;
+            min-width: 200px;
         }
 
         .export-button:hover {
@@ -301,15 +314,16 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 16px;
+            padding: 12px 20px;
             background: var(--surface);
             border-radius: 8px;
             font-size: 14px;
             font-weight: 500;
-            margin-top: 16px;
+            margin-top: 20px;
             border: 1px solid var(--border);
             color: var(--text-primary);
             grid-column: 1 / -1;
+            justify-self: center;
         }
 
         .status-dot {
@@ -378,7 +392,7 @@
         }
 
         .line-controls-content {
-            padding: 16px;
+            padding: 20px;
             display: none;
             background: rgba(255, 255, 255, 0.02);
         }
@@ -389,13 +403,87 @@
 
         .line-control-group {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            margin-bottom: 16px;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 20px;
+            align-items: start;
         }
 
         .line-control-group:last-child {
             margin-bottom: 0;
+        }
+
+        /* Per-line control specific styling */
+        .line-controls-content .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+            height: 100%;
+            min-height: 80px;
+        }
+
+        .line-controls-content .control-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            width: 100%;
+            height: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .line-controls-content input[type="range"] {
+            width: 100%;
+            margin: 6px 0;
+        }
+
+        .line-controls-content input[type="color"] {
+            width: 50px;
+            height: 40px;
+            align-self: flex-start;
+            margin-top: 4px;
+        }
+
+        .line-controls-content select {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 13px;
+            height: 44px;
+        }
+
+        .line-controls-content span {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        .line-controls-content .font-style-controls {
+            margin-top: 4px;
+        }
+
+        .color-controls {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .color-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .color-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
 
         .font-weight-control {
@@ -408,18 +496,22 @@
             display: flex;
             gap: 8px;
             align-items: center;
+            flex-wrap: wrap;
+            margin-top: 4px;
         }
 
         .style-button {
-            padding: 8px 12px;
+            padding: 10px 16px;
             border: 1px solid var(--border);
             border-radius: 8px;
             background: var(--surface);
             color: var(--text-primary);
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 500;
+            min-width: 60px;
+            text-align: center;
         }
 
         .style-button:hover {
@@ -438,17 +530,41 @@
                 font-size: 2rem;
             }
             
+            .input-section, .controls, .canvas-container {
+                max-width: 100%;
+                padding: 24px;
+                margin: 0 16px;
+            }
+            
             .controls {
                 grid-template-columns: 1fr;
-                padding: 24px;
+                gap: 20px;
             }
             
             .export-button {
                 width: 100%;
+                min-width: auto;
             }
             
             .line-control-group {
                 grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .line-controls-content {
+                padding: 16px;
+            }
+            
+            .line-controls-content .control-group {
+                gap: 6px;
+            }
+            
+            .font-style-controls {
+                justify-content: center;
+            }
+            
+            .control-group {
+                gap: 10px;
             }
         }
     </style>
@@ -539,28 +655,6 @@ Smooth Animation</textarea>
                 <input type="color" id="globalStrokeColor" value="#000000">
             </div>
             
-            <div class="control-group">
-                <label for="globalShadowBlur">Shadow Blur (Global)</label>
-                <input type="range" id="globalShadowBlur" min="0" max="20" step="0.5" value="0">
-                <span id="globalShadowBlurValue">0px</span>
-            </div>
-            
-            <div class="control-group">
-                <label for="globalShadowOffsetX">Shadow Offset X (Global)</label>
-                <input type="range" id="globalShadowOffsetX" min="-10" max="10" step="0.5" value="0">
-                <span id="globalShadowOffsetXValue">0px</span>
-            </div>
-            
-            <div class="control-group">
-                <label for="globalShadowOffsetY">Shadow Offset Y (Global)</label>
-                <input type="range" id="globalShadowOffsetY" min="-10" max="10" step="0.5" value="0">
-                <span id="globalShadowOffsetYValue">0px</span>
-            </div>
-            
-            <div class="control-group">
-                <label for="globalShadowColor">Shadow Color (Global)</label>
-                <input type="color" id="globalShadowColor" value="#000000">
-            </div>
             
             <div class="control-group">
                 <label for="textAlign">Text Alignment</label>
@@ -580,8 +674,7 @@ Smooth Animation</textarea>
             
             <div class="control-group">
                 <label for="lineHeight">Line Height</label>
-                <input type="range" id="lineHeight" min="0.5" max="2" step="0.1" value="1">
-                <span id="lineHeightValue">1.0x</span>
+                <input type="range" id="lineHeight" min="0.5" max="1.3" step="0.1" value="1">
             </div>
             
             <div class="line-controls">
@@ -623,17 +716,17 @@ Smooth Animation</textarea>
                 this.globalStrokeWidth = document.getElementById('globalStrokeWidth');
                 this.globalStrokeWidthValue = document.getElementById('globalStrokeWidthValue');
                 this.globalStrokeColor = document.getElementById('globalStrokeColor');
-                this.globalShadowBlur = document.getElementById('globalShadowBlur');
-                this.globalShadowBlurValue = document.getElementById('globalShadowBlurValue');
-                this.globalShadowOffsetX = document.getElementById('globalShadowOffsetX');
-                this.globalShadowOffsetXValue = document.getElementById('globalShadowOffsetXValue');
-                this.globalShadowOffsetY = document.getElementById('globalShadowOffsetY');
-                this.globalShadowOffsetYValue = document.getElementById('globalShadowOffsetYValue');
-                this.globalShadowColor = document.getElementById('globalShadowColor');
+                
+                // Debug: Check if elements exist
+                if (!this.globalStrokeWidthValue) {
+                    console.error('globalStrokeWidthValue element not found');
+                }
+                if (!this.globalFontWeightValue) {
+                    console.error('globalFontWeightValue element not found');
+                }
                 this.animationSpeedSlider = document.getElementById('animationSpeed');
                 this.speedValueSpan = document.getElementById('speedValue');
                 this.lineHeightSlider = document.getElementById('lineHeight');
-                this.lineHeightValueSpan = document.getElementById('lineHeightValue');
                 this.lineControlsContainer = document.getElementById('lineControlsContainer');
                 
                 // Animation state
@@ -646,7 +739,6 @@ Smooth Animation</textarea>
                 this.fadeInDuration = 0.5; // seconds for fade in effect
                 this.endDelay = 2.0; // extra seconds at the end to show all lines
                 this.animationSpeed = 3.0; // speed multiplier
-                this.zoomLevel = 1.0; // zoom level for preview
                 this.lineHeightMultiplier = 1.0; // line height multiplier
                 this.loopDuration = 0;
                 this.shouldLoop = true;
@@ -679,9 +771,9 @@ Smooth Animation</textarea>
                 // Scale the drawing context so everything will work at the higher ratio
                 this.ctx.scale(devicePixelRatio, devicePixelRatio);
                 
-                // Set the display size (CSS pixels) with zoom applied
-                this.canvas.style.width = (containerWidth * this.zoomLevel) + 'px';
-                this.canvas.style.height = (containerHeight * this.zoomLevel) + 'px';
+                // Set the display size (CSS pixels)
+                this.canvas.style.width = containerWidth + 'px';
+                this.canvas.style.height = containerHeight + 'px';
             }
 
             startAnimation() {
@@ -735,14 +827,23 @@ Smooth Animation</textarea>
                 });
                 
                 // Global font weight control
-                this.globalFontWeight.addEventListener('input', (e) => {
+                if (this.globalFontWeight) {
+                    this.globalFontWeight.addEventListener('input', (e) => {
                     const value = parseInt(e.target.value);
-                    this.globalFontWeightValue.textContent = value;
+                    console.log('Font weight changed to:', value);
+                    if (this.globalFontWeightValue) {
+                        this.globalFontWeightValue.textContent = value;
+                    } else {
+                        console.error('globalFontWeightValue is null');
+                    }
                     this.lineProperties.forEach(lineProp => {
                         lineProp.fontWeight = value;
                     });
                     this.restartAnimation();
-                });
+                    });
+                } else {
+                    console.error('globalFontWeight element not found');
+                }
                 
                 // Global font style control
                 this.globalFontStyle.addEventListener('change', () => {
@@ -753,14 +854,23 @@ Smooth Animation</textarea>
                 });
                 
                 // Global stroke width control
-                this.globalStrokeWidth.addEventListener('input', (e) => {
+                if (this.globalStrokeWidth) {
+                    this.globalStrokeWidth.addEventListener('input', (e) => {
                     const value = parseFloat(e.target.value);
-                    this.globalStrokeWidthValue.textContent = value + 'px';
+                    console.log('Stroke width changed to:', value);
+                    if (this.globalStrokeWidthValue) {
+                        this.globalStrokeWidthValue.textContent = value + 'px';
+                    } else {
+                        console.error('globalStrokeWidthValue is null');
+                    }
                     this.lineProperties.forEach(lineProp => {
                         lineProp.strokeWidth = value;
                     });
                     this.restartAnimation();
-                });
+                    });
+                } else {
+                    console.error('globalStrokeWidth element not found');
+                }
                 
                 // Global stroke color control
                 this.globalStrokeColor.addEventListener('change', () => {
@@ -770,43 +880,6 @@ Smooth Animation</textarea>
                     this.restartAnimation();
                 });
                 
-                // Global shadow blur control
-                this.globalShadowBlur.addEventListener('input', (e) => {
-                    const value = parseFloat(e.target.value);
-                    this.globalShadowBlurValue.textContent = value + 'px';
-                    this.lineProperties.forEach(lineProp => {
-                        lineProp.shadowBlur = value;
-                    });
-                    this.restartAnimation();
-                });
-                
-                // Global shadow offset X control
-                this.globalShadowOffsetX.addEventListener('input', (e) => {
-                    const value = parseFloat(e.target.value);
-                    this.globalShadowOffsetXValue.textContent = value + 'px';
-                    this.lineProperties.forEach(lineProp => {
-                        lineProp.shadowOffsetX = value;
-                    });
-                    this.restartAnimation();
-                });
-                
-                // Global shadow offset Y control
-                this.globalShadowOffsetY.addEventListener('input', (e) => {
-                    const value = parseFloat(e.target.value);
-                    this.globalShadowOffsetYValue.textContent = value + 'px';
-                    this.lineProperties.forEach(lineProp => {
-                        lineProp.shadowOffsetY = value;
-                    });
-                    this.restartAnimation();
-                });
-                
-                // Global shadow color control
-                this.globalShadowColor.addEventListener('change', () => {
-                    this.lineProperties.forEach(lineProp => {
-                        lineProp.shadowColor = this.globalShadowColor.value;
-                    });
-                    this.restartAnimation();
-                });
                 this.textAlignSelect.addEventListener('change', () => {
                     this.restartAnimation();
                 });
@@ -819,17 +892,10 @@ Smooth Animation</textarea>
                     this.restartAnimation();
                 });
                 
-                // Zoom level control
-                this.zoomLevelSlider.addEventListener('input', (e) => {
-                    this.zoomLevel = parseFloat(e.target.value);
-                    this.zoomValueSpan.textContent = Math.round(this.zoomLevel * 100) + '%';
-                    this.applyZoom();
-                });
                 
                 // Line height control
                 this.lineHeightSlider.addEventListener('input', (e) => {
                     this.lineHeightMultiplier = parseFloat(e.target.value);
-                    this.lineHeightValueSpan.textContent = this.lineHeightMultiplier.toFixed(1) + 'x';
                     this.restartAnimation();
                 });
                 
@@ -866,17 +932,6 @@ Smooth Animation</textarea>
                 this.startAnimation();
             }
 
-            applyZoom() {
-                const canvasContainer = this.canvas.parentElement;
-                const baseWidth = canvasContainer.clientWidth - 40;
-                const baseHeight = baseWidth * (9/16); // Fixed 16:9 aspect ratio
-                
-                const zoomedWidth = baseWidth * this.zoomLevel;
-                const zoomedHeight = baseHeight * this.zoomLevel;
-                
-                this.canvas.style.width = zoomedWidth + 'px';
-                this.canvas.style.height = zoomedHeight + 'px';
-            }
 
             getDefaultLineProperties() {
                 return {
@@ -886,11 +941,7 @@ Smooth Animation</textarea>
                     fontStyle: this.globalFontStyle.value,
                     color: this.textColorInput.value,
                     strokeWidth: parseFloat(this.globalStrokeWidth.value),
-                    strokeColor: this.globalStrokeColor.value,
-                    shadowBlur: parseFloat(this.globalShadowBlur.value),
-                    shadowOffsetX: parseFloat(this.globalShadowOffsetX.value),
-                    shadowOffsetY: parseFloat(this.globalShadowOffsetY.value),
-                    shadowColor: this.globalShadowColor.value
+                    strokeColor: this.globalStrokeColor.value
                 };
             }
 
@@ -967,18 +1018,6 @@ Smooth Animation</textarea>
                     <div class="line-controls-content">
                         <div class="line-control-group">
                             <div class="control-group">
-                                <label>Speed</label>
-                                <input type="range" min="0.5" max="3" step="0.1" value="${lineProps.speed}" onchange="textGreenScreen.updateLineProperty(${index}, 'speed', parseFloat(this.value))">
-                                <span>${lineProps.speed}x</span>
-                            </div>
-                            <div class="control-group">
-                                <label>Font Weight</label>
-                                <input type="range" min="100" max="900" step="100" value="${lineProps.fontWeight}" onchange="textGreenScreen.updateLineProperty(${index}, 'fontWeight', parseInt(this.value))">
-                                <span>${lineProps.fontWeight}</span>
-                            </div>
-                        </div>
-                        <div class="line-control-group">
-                            <div class="control-group">
                                 <label>Font Family</label>
                                 <select onchange="textGreenScreen.updateLineProperty(${index}, 'fontFamily', this.value)">
                                     <option value="Inter" ${lineProps.fontFamily === 'Inter' ? 'selected' : ''}>Inter</option>
@@ -1004,47 +1043,43 @@ Smooth Animation</textarea>
                                 </select>
                             </div>
                             <div class="control-group">
+                                <label>Font Weight</label>
+                                <input type="range" min="100" max="900" step="100" value="${lineProps.fontWeight}" onchange="textGreenScreen.updateLineProperty(${index}, 'fontWeight', parseInt(this.value))">
+                                <span id="fontWeightValue_${index}">${lineProps.fontWeight}</span>
+                            </div>
+                        </div>
+                        <div class="line-control-group">
+                            <div class="control-group">
                                 <label>Font Style</label>
                                 <div class="font-style-controls">
                                     <button class="style-button ${lineProps.fontStyle === 'normal' ? 'active' : ''}" onclick="textGreenScreen.toggleFontStyle(${index}, 'normal')">Normal</button>
                                     <button class="style-button ${lineProps.fontStyle === 'italic' ? 'active' : ''}" onclick="textGreenScreen.toggleFontStyle(${index}, 'italic')">Italic</button>
                                 </div>
                             </div>
+                            <div class="control-group">
+                                <label>Speed</label>
+                                <input type="range" min="0.5" max="3" step="0.1" value="${lineProps.speed}" onchange="textGreenScreen.updateLineProperty(${index}, 'speed', parseFloat(this.value))">
+                                <span id="speedValue_${index}">${lineProps.speed}x</span>
+                            </div>
                         </div>
                         <div class="line-control-group">
                             <div class="control-group">
-                                <label>Color</label>
-                                <input type="color" value="${lineProps.color}" onchange="textGreenScreen.updateLineProperty(${index}, 'color', this.value)">
+                                <label>Colors</label>
+                                <div class="color-controls">
+                                    <div class="color-item">
+                                        <span class="color-label">Text</span>
+                                        <input type="color" value="${lineProps.color}" onchange="textGreenScreen.updateLineProperty(${index}, 'color', this.value)">
+                                    </div>
+                                    <div class="color-item">
+                                        <span class="color-label">Stroke</span>
+                                        <input type="color" value="${lineProps.strokeColor}" onchange="textGreenScreen.updateLineProperty(${index}, 'strokeColor', this.value)">
+                                    </div>
+                                </div>
                             </div>
                             <div class="control-group">
                                 <label>Stroke Width</label>
                                 <input type="range" min="0" max="10" step="0.5" value="${lineProps.strokeWidth}" onchange="textGreenScreen.updateLineProperty(${index}, 'strokeWidth', parseFloat(this.value))">
-                                <span>${lineProps.strokeWidth}px</span>
-                            </div>
-                            <div class="control-group">
-                                <label>Stroke Color</label>
-                                <input type="color" value="${lineProps.strokeColor}" onchange="textGreenScreen.updateLineProperty(${index}, 'strokeColor', this.value)">
-                            </div>
-                        </div>
-                        <div class="line-control-group">
-                            <div class="control-group">
-                                <label>Shadow Blur</label>
-                                <input type="range" min="0" max="20" step="0.5" value="${lineProps.shadowBlur}" onchange="textGreenScreen.updateLineProperty(${index}, 'shadowBlur', parseFloat(this.value))">
-                                <span>${lineProps.shadowBlur}px</span>
-                            </div>
-                            <div class="control-group">
-                                <label>Shadow Offset X</label>
-                                <input type="range" min="-10" max="10" step="0.5" value="${lineProps.shadowOffsetX}" onchange="textGreenScreen.updateLineProperty(${index}, 'shadowOffsetX', parseFloat(this.value))">
-                                <span>${lineProps.shadowOffsetX}px</span>
-                            </div>
-                            <div class="control-group">
-                                <label>Shadow Offset Y</label>
-                                <input type="range" min="-10" max="10" step="0.5" value="${lineProps.shadowOffsetY}" onchange="textGreenScreen.updateLineProperty(${index}, 'shadowOffsetY', parseFloat(this.value))">
-                                <span>${lineProps.shadowOffsetY}px</span>
-                            </div>
-                            <div class="control-group">
-                                <label>Shadow Color</label>
-                                <input type="color" value="${lineProps.shadowColor}" onchange="textGreenScreen.updateLineProperty(${index}, 'shadowColor', this.value)">
+                                <span id="strokeWidthValue_${index}">${lineProps.strokeWidth}px</span>
                             </div>
                         </div>
                     </div>
@@ -1055,13 +1090,48 @@ Smooth Animation</textarea>
             updateLineProperty(lineIndex, property, value) {
                 if (this.lineProperties[lineIndex]) {
                     this.lineProperties[lineIndex][property] = value;
+                    
+                    // Update the display text for the corresponding span
+                    if (property === 'speed') {
+                        const speedSpan = document.getElementById(`speedValue_${lineIndex}`);
+                        if (speedSpan) {
+                            speedSpan.textContent = value + 'x';
+                        }
+                    } else if (property === 'fontWeight') {
+                        const fontWeightSpan = document.getElementById(`fontWeightValue_${lineIndex}`);
+                        if (fontWeightSpan) {
+                            fontWeightSpan.textContent = value;
+                        }
+                    } else if (property === 'strokeWidth') {
+                        const strokeWidthSpan = document.getElementById(`strokeWidthValue_${lineIndex}`);
+                        if (strokeWidthSpan) {
+                            strokeWidthSpan.textContent = value + 'px';
+                        }
+                    }
+                    
                     this.restartAnimation();
                 }
             }
 
             toggleFontStyle(lineIndex, style) {
+                console.log('toggleFontStyle called:', lineIndex, style);
                 if (this.lineProperties[lineIndex]) {
                     this.lineProperties[lineIndex].fontStyle = style;
+                    console.log('Updated line properties:', this.lineProperties[lineIndex]);
+                    
+                    // Update button states
+                    const lineControlItem = this.lineControlsContainer.children[lineIndex];
+                    if (lineControlItem) {
+                        const buttons = lineControlItem.querySelectorAll('.style-button');
+                        buttons.forEach(button => {
+                            button.classList.remove('active');
+                            if ((style === 'normal' && button.textContent === 'Normal') ||
+                                (style === 'italic' && button.textContent === 'Italic')) {
+                                button.classList.add('active');
+                            }
+                        });
+                    }
+                    
                     this.restartAnimation();
                 }
             }
@@ -1103,11 +1173,6 @@ Smooth Animation</textarea>
                 this.ctx.textAlign = this.textAlignSelect.value;
                 this.ctx.textBaseline = 'middle';
                 
-                // Add text shadow for better quality
-                this.ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-                this.ctx.shadowBlur = this.getFontSize() * 0.02;
-                this.ctx.shadowOffsetX = this.getFontSize() * 0.01;
-                this.ctx.shadowOffsetY = this.getFontSize() * 0.01;
                 
                 // Calculate text position based on alignment
                 let x, y;
@@ -1145,7 +1210,7 @@ Smooth Animation</textarea>
                         // No fade out - lines stay visible once they appear
                         
                         // Set per-line text properties with improved rendering
-                        console.log(`Preview Line ${index} color:`, lineProps.color, 'font:', lineProps.fontFamily);
+                        console.log(`Preview Line ${index} color:`, lineProps.color, 'font:', lineProps.fontFamily, 'style:', lineProps.fontStyle);
                         this.ctx.fillStyle = lineProps.color;
                         this.ctx.font = `${lineProps.fontStyle} ${lineProps.fontWeight} ${this.getFontSize()}px ${lineProps.fontFamily}`;
                         this.ctx.textAlign = this.textAlignSelect.value;
@@ -1160,13 +1225,6 @@ Smooth Animation</textarea>
                             this.ctx.lineWidth = lineProps.strokeWidth;
                         }
                         
-                        // Apply shadow if specified
-                        if (lineProps.shadowBlur > 0) {
-                            this.ctx.shadowColor = lineProps.shadowColor;
-                            this.ctx.shadowBlur = lineProps.shadowBlur;
-                            this.ctx.shadowOffsetX = lineProps.shadowOffsetX;
-                            this.ctx.shadowOffsetY = lineProps.shadowOffsetY;
-                        }
                         
                         this.ctx.globalAlpha = alpha;
                         
@@ -1182,18 +1240,9 @@ Smooth Animation</textarea>
                         this.ctx.globalAlpha = 1;
                         this.ctx.strokeStyle = 'transparent';
                         this.ctx.lineWidth = 0;
-                        this.ctx.shadowColor = 'transparent';
-                        this.ctx.shadowBlur = 0;
-                        this.ctx.shadowOffsetX = 0;
-                        this.ctx.shadowOffsetY = 0;
                     }
                 });
                 
-                // Reset shadow
-                this.ctx.shadowColor = 'transparent';
-                this.ctx.shadowBlur = 0;
-                this.ctx.shadowOffsetX = 0;
-                this.ctx.shadowOffsetY = 0;
             }
 
             updateExportStatus(message, show = true) {
@@ -1518,13 +1567,6 @@ Smooth Animation</textarea>
                         ctx.lineWidth = lineProps.strokeWidth;
                     }
                     
-                    // Apply shadow if specified (same as preview)
-                    if (lineProps.shadowBlur > 0) {
-                        ctx.shadowColor = lineProps.shadowColor;
-                        ctx.shadowBlur = lineProps.shadowBlur;
-                        ctx.shadowOffsetX = lineProps.shadowOffsetX;
-                        ctx.shadowOffsetY = lineProps.shadowOffsetY;
-                    }
                     
                     ctx.globalAlpha = alpha;
                     
@@ -1540,10 +1582,6 @@ Smooth Animation</textarea>
                     ctx.globalAlpha = 1;
                     ctx.strokeStyle = 'transparent';
                     ctx.lineWidth = 0;
-                    ctx.shadowColor = 'transparent';
-                    ctx.shadowBlur = 0;
-                    ctx.shadowOffsetX = 0;
-                    ctx.shadowOffsetY = 0;
                 });
             }
 
