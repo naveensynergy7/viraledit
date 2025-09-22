@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Viral Edit Pro - Home</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    /* Page-specific styles */
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: var(--primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0 0 8px 0;
+      letter-spacing: -0.02em;
+    }
+    
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+      margin: 0;
+    }
+    
+    .canvas-container {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      background: var(--surface);
+      padding: 20px;
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+    }
+    
+    canvas {
+      background: #00ff00;
+      border-radius: 12px;
+      max-width: 90vw;
+      max-height: 50vh;
+      width: auto;
+      height: auto;
+      display: block;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 900px;
+      padding: 32px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      letter-spacing: 0.01em;
+    }
+    
+    input, select {
+      padding: 12px 16px;
+      font-size: 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text-primary);
+      font-family: inherit;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    
+    input:hover, select:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: var(--surface-hover);
+    }
+    
+    input[type="color"] {
+      width: 60px;
+      height: 48px;
+      padding: 4px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    
+    input[type="color"]:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a0a0a0' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 12px center;
+      background-repeat: no-repeat;
+      background-size: 16px;
+      padding-right: 40px;
+    }
+    
+    .main-button {
+      padding: 16px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      background: var(--secondary);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 16px rgba(245, 87, 108, 0.3);
+      font-family: inherit;
+      letter-spacing: 0.01em;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .main-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(245, 87, 108, 0.4);
+    }
+    
+    .main-button:active {
+      transform: translateY(0);
+    }
+    
+    .main-button:disabled {
+      background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .main-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+    
+    .main-button:hover::before {
+      left: 100%;
+    }
+    
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--surface);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-top: 16px;
+      border: 1px solid var(--border);
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .container > * {
+      animation: fadeIn 0.6s ease forwards;
+    }
+    
+    .container > *:nth-child(2) { animation-delay: 0.1s; }
+    .container > *:nth-child(3) { animation-delay: 0.2s; }
+    .container > *:nth-child(4) { animation-delay: 0.3s; }
+    
+    @media (max-width: 768px) {
+      .title {
+        font-size: 2rem;
+      }
+      
+      .controls {
+        grid-template-columns: 1fr;
+        padding: 24px;
+      }
+      
+      .main-button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">Viral Edit Pro</h1>
+      <p class="subtitle">Create viral-worthy animated content for your social media</p>
+    </div>
+
+    <div class="canvas-container">
+      <canvas id="myCanvas" width="1920" height="1080"></canvas>
+    </div>
+    
+    <div class="controls">
+      <div class="control-group">
+        <label for="startNumber">Start Number</label>
+        <input type="number" id="startNumber" value="0" min="0" max="999999" placeholder="0">
+      </div>
+      
+      <div class="control-group">
+        <label for="endNumber">End Number</label>
+        <input type="number" id="endNumber" value="1000" min="1" max="999999" placeholder="1000">
+      </div>
+      
+      <div class="control-group">
+        <label for="duration">Duration (seconds)</label>
+        <input type="number" id="duration" value="5" min="0.5" max="60" step="0.1" placeholder="5.0">
+      </div>
+      
+      <div class="control-group">
+        <label for="fontStyle">Font Family</label>
+        <select id="fontStyle">
+          <option value="Inter">Inter (Modern)</option>
+          <option value="Arial">Arial</option>
+          <option value="Arial Black">Arial Black</option>
+          <option value="Helvetica">Helvetica</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Verdana">Verdana</option>
+          <option value="Courier New">Courier New</option>
+          <option value="Impact">Impact</option>
+          <option value="Comic Sans MS">Comic Sans MS</option>
+          <option value="Trebuchet MS">Trebuchet MS</option>
+          <option value="Palatino">Palatino</option>
+          <option value="Garamond">Garamond</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label for="textColor">Text Color</label>
+        <input type="color" id="textColor" value="#ffffff">
+      </div>
+      
+      <div class="control-group">
+        <label for="exportFormat">Export Format</label>
+        <select id="exportFormat">
+          <option value="webm">WebM (Fast)</option>
+          <option value="mp4">MP4 (High Quality)</option>
+        </select>
+      </div>
+    </div>
+    
+    <button id="startBtn" class="main-button">
+      <span>🎬 Start Animation & Export</span>
+    </button>
+    
+    <div id="statusIndicator" class="status-indicator" style="display: none;">
+      <div class="status-dot"></div>
+      <span id="statusText">Ready to animate</span>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("myCanvas");
+    const ctx = canvas.getContext("2d");
+    const startBtn = document.getElementById("startBtn");
+    const startNumberInput = document.getElementById("startNumber");
+    const endNumberInput = document.getElementById("endNumber");
+    const durationInput = document.getElementById("duration");
+    const fontStyleSelect = document.getElementById("fontStyle");
+    const textColorInput = document.getElementById("textColor");
+    const exportFormatSelect = document.getElementById("exportFormat");
+    const statusIndicator = document.getElementById("statusIndicator");
+    const statusText = document.getElementById("statusText");
+
+    function updateStatus(message, show = true) {
+      statusText.textContent = message;
+      statusIndicator.style.display = show ? 'inline-flex' : 'none';
+    }
+
+    function drawNumber(num) {
+      // Enable high-quality rendering
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      
+      // Fill entire canvas with green background first
+      ctx.fillStyle = "#00ff00";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Use user-selected color and font for text
+      ctx.fillStyle = textColorInput.value;
+      // Scale font size based on canvas resolution
+      const fontSize = Math.min(canvas.width, canvas.height) * 0.15;
+      ctx.font = `bold ${fontSize}px ${fontStyleSelect.value}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      
+      // Add text shadow for better quality appearance
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = fontSize * 0.02;
+      ctx.shadowOffsetX = fontSize * 0.01;
+      ctx.shadowOffsetY = fontSize * 0.01;
+      
+      ctx.fillText(num, canvas.width / 2, canvas.height / 2);
+      
+      // Reset shadow for next frame
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+    }
+
+    function animateNumber(start, end, duration, callback) {
+      let startTime = null;
+      let animationComplete = false;
+      
+      // Draw the start number immediately
+      drawNumber(start);
+      
+      function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        
+        // Calculate current number, ensuring we hit both start and end exactly
+        let current;
+        if (progress === 0) {
+          current = start;
+        } else if (progress === 1) {
+          current = end;
+        } else {
+          current = Math.round(progress * (end - start) + start);
+        }
+        
+        drawNumber(current);
+        
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          // Ensure we end exactly on the target number
+          drawNumber(end);
+          animationComplete = true;
+          callback && callback();
+        }
+      }
+      requestAnimationFrame(step);
+      
+      // Return a promise that resolves when animation is complete
+      return new Promise((resolve) => {
+        const checkComplete = () => {
+          if (animationComplete) {
+            resolve();
+          } else {
+            setTimeout(checkComplete, 10);
+          }
+        };
+        checkComplete();
+      });
+    }
+
+    function validateInputs() {
+      const start = parseInt(startNumberInput.value);
+      const end = parseInt(endNumberInput.value);
+      const duration = parseFloat(durationInput.value);
+      
+      if (isNaN(start) || isNaN(end) || isNaN(duration)) {
+        alert("Please enter valid numbers for all fields");
+        return false;
+      }
+      
+      if (start >= end) {
+        alert("End number must be greater than start number");
+        return false;
+      }
+      
+      if (duration <= 0) {
+        alert("Duration must be greater than 0");
+        return false;
+      }
+      
+      return true;
+    }
+
+    startBtn.addEventListener("click", () => {
+      if (!validateInputs()) return;
+      
+      // Get user input values
+      const startNum = parseInt(startNumberInput.value);
+      const endNum = parseInt(endNumberInput.value);
+      const durationSeconds = parseFloat(durationInput.value);
+      const durationMs = durationSeconds * 1000;
+      
+      // Disable button during animation
+      startBtn.disabled = true;
+      startBtn.innerHTML = '<span>🔴 Recording...</span>';
+      updateStatus("Initializing recording...");
+      
+      // Capture canvas stream with high quality settings
+      let stream = canvas.captureStream(60); // 60fps
+      
+      // Get export format preference
+      const exportFormat = exportFormatSelect.value;
+      
+      // Try different codec options based on format preference
+      let options = {};
+      
+      if (exportFormat === "mp4") {
+        // Try MP4 codecs first
+        const mp4Codecs = [
+          'video/mp4;codecs=h264',
+          'video/mp4',
+          'video/webm;codecs=h264'
+        ];
+        
+        for (const codec of mp4Codecs) {
+          if (MediaRecorder.isTypeSupported(codec)) {
+            options = {
+              mimeType: codec,
+              videoBitsPerSecond: 8000000 // 8 Mbps for high quality
+            };
+            break;
+          }
+        }
+      }
+      
+      // Fallback to WebM if MP4 not supported or WebM preferred
+      if (!options.mimeType) {
+        const webmCodecs = [
+          'video/webm;codecs=vp9',
+          'video/webm;codecs=vp8',
+          'video/webm'
+        ];
+        
+        for (const codec of webmCodecs) {
+          if (MediaRecorder.isTypeSupported(codec)) {
+            options = {
+              mimeType: codec,
+              videoBitsPerSecond: exportFormat === "mp4" ? 8000000 : 5000000
+            };
+            break;
+          }
+        }
+      }
+      
+      // Final fallback
+      if (!options.mimeType) {
+        options = {
+          mimeType: 'video/webm',
+          videoBitsPerSecond: 3000000
+        };
+      }
+      
+      let recorder = new MediaRecorder(stream, options);
+      let chunks = [];
+
+      recorder.ondataavailable = e => chunks.push(e.data);
+      recorder.onstop = async () => {
+        updateStatus("Processing video...");
+        let blob = new Blob(chunks, { type: "video/webm" });
+        
+        const exportFormat = exportFormatSelect.value;
+        
+        // Determine file extension based on the actual mime type
+        const mimeType = recorder.mimeType || 'video/webm';
+        const isMP4 = mimeType.includes('mp4') || mimeType.includes('h264');
+        const fileExtension = isMP4 ? 'mp4' : 'webm';
+        const fileName = `number-animation-${startNum}-to-${endNum}-HD.${fileExtension}`;
+        
+        downloadVideo(blob, fileName);
+        
+        // Re-enable button
+        startBtn.disabled = false;
+        startBtn.innerHTML = '<span>🎬 Start Animation & Export</span>';
+        updateStatus("Video exported successfully! ✨");
+        setTimeout(() => updateStatus("", false), 3000);
+      };
+
+      const recordingStartTime = Date.now();
+      recorder.start();
+      updateStatus(`Recording ${startNum} → ${endNum} (${durationSeconds}s)`);
+      
+      // Run the animation with user settings and wait for completion
+      animateNumber(startNum, endNum, durationMs, () => {
+        updateStatus("Animation complete, finishing recording...");
+      }).then(() => {
+        // Calculate exact recording duration to match animation
+        const actualRecordingTime = Date.now() - recordingStartTime;
+        const remainingTime = Math.max(0, durationMs - actualRecordingTime);
+        
+        // Wait for the exact animation duration before stopping
+        setTimeout(() => {
+          updateStatus("Finishing recording...");
+          recorder.stop();
+        }, remainingTime);
+      });
+    });
+    
+    // Preview function to show current settings
+    function previewNumber() {
+      const previewNum = parseInt(endNumberInput.value) || 1000;
+      drawNumber(previewNum);
+      updateStatus("Preview updated", true);
+      setTimeout(() => updateStatus("", false), 1500);
+    }
+    
+    // Add event listeners for live preview
+    fontStyleSelect.addEventListener("change", previewNumber);
+    textColorInput.addEventListener("change", previewNumber);
+    endNumberInput.addEventListener("input", () => {
+      setTimeout(previewNumber, 300); // Debounce for input
+    });
+    
+    // Helper function to download video
+    function downloadVideo(blob, filename) {
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+
+
+    // Show welcome status
+    updateStatus("Ready to create amazing animations! 🚀");
+    setTimeout(() => updateStatus("", false), 3000);
+    
+    // Initial preview
+    setTimeout(previewNumber, 500);
+  </script>
+  <script src="shared.js"></script>
+</body>
+</html>
+
+

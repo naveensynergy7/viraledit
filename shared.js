@@ -31,9 +31,9 @@ class SiteNavigation {
                         </a>
                     </div>
                     <div class="nav-item">
-                        <a href="text-green-screen.html" class="nav-link" data-page="text-green-screen">
+                        <a href="timer.html" class="nav-link" data-page="timer">
                             <span class="nav-icon">📝</span>
-                            <span>Text Green Screen</span>
+                            <span>Timer Green Screen</span>
                         </a>
                     </div>
                     <div class="nav-item">
@@ -68,7 +68,7 @@ class SiteNavigation {
                         <h3>🛠️ Tools</h3>
                         <ul class="footer-links">
                             <li><a href="index.html">🏠 Home</a></li>
-                            <li><a href="text-green-screen.html">📝 Text Green Screen</a></li>
+                            <li><a href="timer.html">📝 Timer Green Screen</a></li>
                             <li><a href="paper-animation.html">📄 Paper Animation</a></li>
                         </ul>
                     </div>
@@ -144,8 +144,8 @@ class SiteNavigation {
         
         if (filename === 'index.html' || filename === '' || filename === '/') {
             return 'home';
-        } else if (filename === 'text-green-screen.html') {
-            return 'text-green-screen';
+        } else if (filename === 'timer.html') {
+            return 'timer';
         } else if (filename === 'paper-animation.html') {
             return 'paper-animation';
         }

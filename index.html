@@ -1,576 +1,1601 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Viral Edit Pro - Home</title>
-  <link rel="stylesheet" href="shared.css">
-  <style>
-    /* Page-specific styles */
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    
-    .title {
-      font-size: 2.5rem;
-      font-weight: 700;
-      background: var(--primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin: 0 0 8px 0;
-      letter-spacing: -0.02em;
-    }
-    
-    .subtitle {
-      font-size: 1.1rem;
-      color: var(--text-secondary);
-      font-weight: 400;
-      margin: 0;
-    }
-    
-    .canvas-container {
-      position: relative;
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      background: var(--surface);
-      padding: 20px;
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-    }
-    
-    canvas {
-      background: #00ff00;
-      border-radius: 12px;
-      max-width: 90vw;
-      max-height: 50vh;
-      width: auto;
-      height: auto;
-      display: block;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    }
-    
-    .controls {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-      width: 100%;
-      max-width: 900px;
-      padding: 32px;
-      background: var(--surface);
-      border-radius: var(--radius);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-    }
-    
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    
-    label {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-      letter-spacing: 0.01em;
-    }
-    
-    input, select {
-      padding: 12px 16px;
-      font-size: 14px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface);
-      color: var(--text-primary);
-      font-family: inherit;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
-    }
-    
-    input:focus, select:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-      background: rgba(255, 255, 255, 0.08);
-    }
-    
-    input:hover, select:hover {
-      border-color: rgba(255, 255, 255, 0.2);
-      background: var(--surface-hover);
-    }
-    
-    input[type="color"] {
-      width: 60px;
-      height: 48px;
-      padding: 4px;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      overflow: hidden;
-    }
-    
-    input[type="color"]:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    }
-    
-    select {
-      cursor: pointer;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a0a0a0' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-      background-position: right 12px center;
-      background-repeat: no-repeat;
-      background-size: 16px;
-      padding-right: 40px;
-    }
-    
-    .main-button {
-      padding: 16px 32px;
-      font-size: 16px;
-      font-weight: 600;
-      border: none;
-      border-radius: 12px;
-      background: var(--secondary);
-      color: white;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 16px rgba(245, 87, 108, 0.3);
-      font-family: inherit;
-      letter-spacing: 0.01em;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .main-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(245, 87, 108, 0.4);
-    }
-    
-    .main-button:active {
-      transform: translateY(0);
-    }
-    
-    .main-button:disabled {
-      background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%);
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    
-    .main-button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s ease;
-    }
-    
-    .main-button:hover::before {
-      left: 100%;
-    }
-    
-    .status-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      background: var(--surface);
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      margin-top: 16px;
-      border: 1px solid var(--border);
-    }
-    
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--success);
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .container > * {
-      animation: fadeIn 0.6s ease forwards;
-    }
-    
-    .container > *:nth-child(2) { animation-delay: 0.1s; }
-    .container > *:nth-child(3) { animation-delay: 0.2s; }
-    .container > *:nth-child(4) { animation-delay: 0.3s; }
-    
-    @media (max-width: 768px) {
-      .title {
-        font-size: 2rem;
-      }
-      
-      .controls {
-        grid-template-columns: 1fr;
-        padding: 24px;
-      }
-      
-      .main-button {
-        width: 100%;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Green Screen - Viral Edit Pro</title>
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        /* Additional font imports for text green screen */
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Lato:wght/100;300;400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=League+Gothic&display=swap');
+        
+        /* Page-specific styles */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin: 0;
+        }
+
+        .input-section {
+            width: 100%;
+            max-width: 900px;
+            padding: 32px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .input-section h3 {
+            color: var(--text-primary);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .text-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .text-input {
+            padding: 16px 20px;
+            font-size: 18px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface);
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .text-input:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: var(--surface-hover);
+        }
+
+        .canvas-container {
+            position: relative;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            background: var(--surface);
+            padding: 0 20px; /* Reduced top/bottom padding to 0 */
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            width: 100%;
+            max-width: 900px;
+        }
+
+        #canvas {
+            background: #00FF00;
+            border-radius: 12px;
+            max-width: 100%;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16/9; /* Fixed 16:9 aspect ratio */
+            display: block;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            image-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 900px;
+            padding: 32px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .controls h3 {
+            color: var(--text-primary);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-weight: 600;
+            grid-column: 1 / -1;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.01em;
+        }
+
+        input[type="color"] {
+            width: 60px;
+            height: 48px;
+            padding: 4px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        input[type="color"]:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        select {
+            padding: 12px 16px;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface);
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a0a0a0' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        select:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: var(--surface-hover);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--surface-hover);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--secondary);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--secondary);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-group span {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #667eea;
+            cursor: pointer;
+        }
+
+        .export-button {
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: var(--secondary);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(245, 87, 108, 0.3);
+            font-family: inherit;
+            letter-spacing: 0.01em;
+            position: relative;
+            overflow: hidden;
+            grid-column: 1 / -1;
+            margin-top: 15px;
+        }
+
+        .export-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(245, 87, 108, 0.4);
+        }
+
+        .export-button:active {
+            transform: translateY(0);
+        }
+
+        .export-button:disabled {
+            background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .export-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .export-button:hover::before {
+            left: 100%;
+        }
+
+        .export-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--surface);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 16px;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            grid-column: 1 / -1;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .container > * {
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .container > *:nth-child(2) { animation-delay: 0.1s; }
+        .container > *:nth-child(3) { animation-delay: 0.2s; }
+        .container > *:nth-child(4) { animation-delay: 0.3s; }
+
+        .line-controls {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .line-control-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .line-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--surface-hover);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .line-header:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .line-preview {
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .expand-icon {
+            transition: transform 0.3s ease;
+            color: var(--text-secondary);
+        }
+
+        .line-controls-content {
+            padding: 16px;
+            display: none;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .line-controls-content.expanded {
+            display: block;
+        }
+
+        .line-control-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .line-control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .font-weight-control {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .font-style-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .style-button {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .style-button:hover {
+            background: var(--surface-hover);
+            border-color: #667eea;
+        }
+
+        .style-button.active {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+                padding: 24px;
+            }
+            
+            .export-button {
+                width: 100%;
+            }
+            
+            .line-control-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1 class="title">Viral Edit Pro</h1>
-      <p class="subtitle">Create viral-worthy animated content for your social media</p>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">📝 Text on Green Screen</h1>
+            <p class="subtitle">Create viral text animations with professional green screen export</p>
+        </div>
+        
+        <div class="input-section">
+            <h3>✏️ Enter Your Text (One Line Per Animation)</h3>
+            <div class="text-input-group">
+                <textarea 
+                    id="textInput" 
+                    class="text-input" 
+                    placeholder="Type your text here, one line per animation...&#10;Each line will fade in sequentially&#10;Video duration depends on number of lines&#10;&#10;Example:&#10;Line 1&#10;Line 2&#10;Line 3"
+                    rows="8"
+                >Welcome Home
+This Works
+And That
+Each Line
+Smooth Animation</textarea>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="canvas" width="3840" height="2160"></canvas>
+        </div>
+
+        <div class="controls">
+            <h3>🎨 Text Styling</h3>
+            <div class="control-group">
+                <label for="fontStyle">Font Family (Global Default)</label>
+                <select id="fontStyle">
+                    <option value="Inter">Inter (Modern)</option>
+                    <option value="Bebas Neue">Bebas Neue (Bold Titles)</option>
+                    <option value="Helvetica">Helvetica (Clean)</option>
+                    <option value="Futura">Futura (Geometric)</option>
+                    <option value="Arial">Arial (Reliable)</option>
+                    <option value="Oswald">Oswald (Condensed)</option>
+                    <option value="Gotham">Gotham (Versatile)</option>
+                    <option value="Montserrat">Montserrat (Friendly)</option>
+                    <option value="Raleway">Raleway (Sleek)</option>
+                    <option value="Anton">Anton (Heavy)</option>
+                    <option value="Roboto">Roboto (Modern)</option>
+                    <option value="Lato">Lato (Professional)</option>
+                    <option value="Playfair Display">Playfair Display (Elegant)</option>
+                    <option value="Eurostile">Eurostile (Futuristic)</option>
+                    <option value="Impact">Impact (Bold)</option>
+                    <option value="Lucida Grande">Lucida Grande (Clear)</option>
+                    <option value="Tahoma">Tahoma (Narrow)</option>
+                    <option value="Cinzel">Cinzel (Classical)</option>
+                    <option value="League Gothic">League Gothic (Vintage)</option>
+                    <option value="Morganite">Morganite (Urban)</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="textColor">Text Color</label>
+                <input type="color" id="textColor" value="#ffffff">
+            </div>
+            
+            <div class="control-group">
+                <label for="globalFontWeight">Font Weight (Global)</label>
+                <input type="range" id="globalFontWeight" min="100" max="900" step="100" value="700">
+                <span id="globalFontWeightValue">700</span>
+            </div>
+            
+            <div class="control-group">
+                <label for="globalFontStyle">Font Style (Global)</label>
+                <select id="globalFontStyle">
+                    <option value="normal">Normal</option>
+                    <option value="italic">Italic</option>
+                    <option value="oblique">Oblique</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="globalStrokeWidth">Stroke Width (Global)</label>
+                <input type="range" id="globalStrokeWidth" min="0" max="10" step="0.5" value="0">
+                <span id="globalStrokeWidthValue">0px</span>
+            </div>
+            
+            <div class="control-group">
+                <label for="globalStrokeColor">Stroke Color (Global)</label>
+                <input type="color" id="globalStrokeColor" value="#000000">
+            </div>
+            
+            <div class="control-group">
+                <label for="globalShadowBlur">Shadow Blur (Global)</label>
+                <input type="range" id="globalShadowBlur" min="0" max="20" step="0.5" value="0">
+                <span id="globalShadowBlurValue">0px</span>
+            </div>
+            
+            <div class="control-group">
+                <label for="globalShadowOffsetX">Shadow Offset X (Global)</label>
+                <input type="range" id="globalShadowOffsetX" min="-10" max="10" step="0.5" value="0">
+                <span id="globalShadowOffsetXValue">0px</span>
+            </div>
+            
+            <div class="control-group">
+                <label for="globalShadowOffsetY">Shadow Offset Y (Global)</label>
+                <input type="range" id="globalShadowOffsetY" min="-10" max="10" step="0.5" value="0">
+                <span id="globalShadowOffsetYValue">0px</span>
+            </div>
+            
+            <div class="control-group">
+                <label for="globalShadowColor">Shadow Color (Global)</label>
+                <input type="color" id="globalShadowColor" value="#000000">
+            </div>
+            
+            <div class="control-group">
+                <label for="textAlign">Text Alignment</label>
+                <select id="textAlign">
+                    <option value="center" selected>Center</option>
+                    <option value="left">Left</option>
+                    <option value="right">Right</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="animationSpeed">Animation Speed</label>
+                <input type="range" id="animationSpeed" min="0.5" max="5" step="0.1" value="3">
+                <span id="speedValue">3.0x</span>
+            </div>
+            
+            
+            <div class="control-group">
+                <label for="lineHeight">Line Height</label>
+                <input type="range" id="lineHeight" min="0.5" max="2" step="0.1" value="1">
+                <span id="lineHeightValue">1.0x</span>
+            </div>
+            
+            <div class="line-controls">
+                <h3>🎯 Per-Line Controls</h3>
+                <div id="lineControlsContainer">
+                    <!-- Per-line controls will be dynamically generated here -->
+                </div>
+            </div>
+            
+            <button id="exportBtn" class="export-button">
+                <span>🎬 Export as MP4</span>
+            </button>
+            <div id="exportStatus" class="export-status" style="display: none;">
+                <div class="status-dot"></div>
+                <span id="exportStatusText">Ready to export</span>
+            </div>
+        </div>
     </div>
 
-    <div class="canvas-container">
-      <canvas id="myCanvas" width="1920" height="1080"></canvas>
-    </div>
-    
-    <div class="controls">
-      <div class="control-group">
-        <label for="startNumber">Start Number</label>
-        <input type="number" id="startNumber" value="0" min="0" max="999999" placeholder="0">
-      </div>
-      
-      <div class="control-group">
-        <label for="endNumber">End Number</label>
-        <input type="number" id="endNumber" value="1000" min="1" max="999999" placeholder="1000">
-      </div>
-      
-      <div class="control-group">
-        <label for="duration">Duration (seconds)</label>
-        <input type="number" id="duration" value="5" min="0.5" max="60" step="0.1" placeholder="5.0">
-      </div>
-      
-      <div class="control-group">
-        <label for="fontStyle">Font Family</label>
-        <select id="fontStyle">
-          <option value="Inter">Inter (Modern)</option>
-          <option value="Arial">Arial</option>
-          <option value="Arial Black">Arial Black</option>
-          <option value="Helvetica">Helvetica</option>
-          <option value="Times New Roman">Times New Roman</option>
-          <option value="Georgia">Georgia</option>
-          <option value="Verdana">Verdana</option>
-          <option value="Courier New">Courier New</option>
-          <option value="Impact">Impact</option>
-          <option value="Comic Sans MS">Comic Sans MS</option>
-          <option value="Trebuchet MS">Trebuchet MS</option>
-          <option value="Palatino">Palatino</option>
-          <option value="Garamond">Garamond</option>
-        </select>
-      </div>
-      
-      <div class="control-group">
-        <label for="textColor">Text Color</label>
-        <input type="color" id="textColor" value="#ffffff">
-      </div>
-      
-      <div class="control-group">
-        <label for="exportFormat">Export Format</label>
-        <select id="exportFormat">
-          <option value="webm">WebM (Fast)</option>
-          <option value="mp4">MP4 (High Quality)</option>
-        </select>
-      </div>
-    </div>
-    
-    <button id="startBtn" class="main-button">
-      <span>🎬 Start Animation & Export</span>
-    </button>
-    
-    <div id="statusIndicator" class="status-indicator" style="display: none;">
-      <div class="status-dot"></div>
-      <span id="statusText">Ready to animate</span>
-    </div>
-  </div>
+    <script>
+        class TextGreenScreen {
+            constructor() {
+                this.canvas = document.getElementById('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.textInput = document.getElementById('textInput');
+                this.exportBtn = document.getElementById('exportBtn');
+                this.exportStatus = document.getElementById('exportStatus');
+                this.exportStatusText = document.getElementById('exportStatusText');
+                
+                // Control elements
+                this.fontStyleSelect = document.getElementById('fontStyle');
+                this.textColorInput = document.getElementById('textColor');
+                this.textAlignSelect = document.getElementById('textAlign');
+                
+                // Global font styling controls
+                this.globalFontWeight = document.getElementById('globalFontWeight');
+                this.globalFontWeightValue = document.getElementById('globalFontWeightValue');
+                this.globalFontStyle = document.getElementById('globalFontStyle');
+                this.globalStrokeWidth = document.getElementById('globalStrokeWidth');
+                this.globalStrokeWidthValue = document.getElementById('globalStrokeWidthValue');
+                this.globalStrokeColor = document.getElementById('globalStrokeColor');
+                this.globalShadowBlur = document.getElementById('globalShadowBlur');
+                this.globalShadowBlurValue = document.getElementById('globalShadowBlurValue');
+                this.globalShadowOffsetX = document.getElementById('globalShadowOffsetX');
+                this.globalShadowOffsetXValue = document.getElementById('globalShadowOffsetXValue');
+                this.globalShadowOffsetY = document.getElementById('globalShadowOffsetY');
+                this.globalShadowOffsetYValue = document.getElementById('globalShadowOffsetYValue');
+                this.globalShadowColor = document.getElementById('globalShadowColor');
+                this.animationSpeedSlider = document.getElementById('animationSpeed');
+                this.speedValueSpan = document.getElementById('speedValue');
+                this.lineHeightSlider = document.getElementById('lineHeight');
+                this.lineHeightValueSpan = document.getElementById('lineHeightValue');
+                this.lineControlsContainer = document.getElementById('lineControlsContainer');
+                
+                // Animation state
+                this.isExporting = false;
+                this.animationId = null;
+                this.animationTime = 0;
+                this.lines = [];
+                this.lineProperties = []; // Array to store per-line properties
+                this.lineDuration = 1.5; // seconds per line
+                this.fadeInDuration = 0.5; // seconds for fade in effect
+                this.endDelay = 2.0; // extra seconds at the end to show all lines
+                this.animationSpeed = 3.0; // speed multiplier
+                this.zoomLevel = 1.0; // zoom level for preview
+                this.lineHeightMultiplier = 1.0; // line height multiplier
+                this.loopDuration = 0;
+                this.shouldLoop = true;
+                
+                this.init();
+            }
 
-  <script>
-    const canvas = document.getElementById("myCanvas");
-    const ctx = canvas.getContext("2d");
-    const startBtn = document.getElementById("startBtn");
-    const startNumberInput = document.getElementById("startNumber");
-    const endNumberInput = document.getElementById("endNumber");
-    const durationInput = document.getElementById("duration");
-    const fontStyleSelect = document.getElementById("fontStyle");
-    const textColorInput = document.getElementById("textColor");
-    const exportFormatSelect = document.getElementById("exportFormat");
-    const statusIndicator = document.getElementById("statusIndicator");
-    const statusText = document.getElementById("statusText");
+            init() {
+                this.setupEventListeners();
+                this.generateLineControls();
+                setTimeout(() => {
+                    this.setupHighDPICanvas();
+                    this.calculateLoopDuration();
+                this.startAnimation();
+                }, 100);
+            }
 
-    function updateStatus(message, show = true) {
-      statusText.textContent = message;
-      statusIndicator.style.display = show ? 'inline-flex' : 'none';
-    }
+            setupHighDPICanvas() {
+                const devicePixelRatio = window.devicePixelRatio || 1;
+                const container = this.canvas.parentElement;
+                const containerWidth = container.clientWidth - 40; // Account for 20px padding on left/right sides
+                
+                // Fixed 16:9 aspect ratio for preview canvas
+                const containerHeight = containerWidth * (9/16); // Always 16:9
+                
+                // Set the actual size in memory (scaled to account for extra pixel density)
+                this.canvas.width = containerWidth * devicePixelRatio;
+                this.canvas.height = containerHeight * devicePixelRatio;
+                
+                // Scale the drawing context so everything will work at the higher ratio
+                this.ctx.scale(devicePixelRatio, devicePixelRatio);
+                
+                // Set the display size (CSS pixels) with zoom applied
+                this.canvas.style.width = (containerWidth * this.zoomLevel) + 'px';
+                this.canvas.style.height = (containerHeight * this.zoomLevel) + 'px';
+            }
 
-    function drawNumber(num) {
-      // Enable high-quality rendering
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      
-      // Fill entire canvas with green background first
-      ctx.fillStyle = "#00ff00";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // Use user-selected color and font for text
-      ctx.fillStyle = textColorInput.value;
-      // Scale font size based on canvas resolution
-      const fontSize = Math.min(canvas.width, canvas.height) * 0.15;
-      ctx.font = `bold ${fontSize}px ${fontStyleSelect.value}`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      
-      // Add text shadow for better quality appearance
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-      ctx.shadowBlur = fontSize * 0.02;
-      ctx.shadowOffsetX = fontSize * 0.01;
-      ctx.shadowOffsetY = fontSize * 0.01;
-      
-      ctx.fillText(num, canvas.width / 2, canvas.height / 2);
-      
-      // Reset shadow for next frame
-      ctx.shadowColor = 'transparent';
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-    }
+            startAnimation() {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+                this.animate();
+            }
 
-    function animateNumber(start, end, duration, callback) {
-      let startTime = null;
-      let animationComplete = false;
-      
-      // Draw the start number immediately
-      drawNumber(start);
-      
-      function step(timestamp) {
-        if (!startTime) startTime = timestamp;
-        const progress = Math.min((timestamp - startTime) / duration, 1);
-        
-        // Calculate current number, ensuring we hit both start and end exactly
-        let current;
-        if (progress === 0) {
-          current = start;
-        } else if (progress === 1) {
-          current = end;
-        } else {
-          current = Math.round(progress * (end - start) + start);
+            stopAnimation() {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            }
+
+            animate() {
+                this.animationTime += (1/60) * this.animationSpeed;
+                if (this.shouldLoop && this.loopDuration > 0 && this.animationTime >= this.loopDuration) {
+                    this.animationTime = 0;
+                }
+                this.drawText();
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+
+            setupEventListeners() {
+                this.textInput.addEventListener('input', () => {
+                    this.generateLineControls();
+                    this.restartAnimation();
+                });
+                this.fontStyleSelect.addEventListener('change', () => {
+                    // Update all existing line properties with the new global font
+                    this.lineProperties.forEach(lineProp => {
+                        lineProp.fontFamily = this.fontStyleSelect.value;
+                    });
+                    
+                    // Update all font family dropdowns in the UI to reflect the global change
+                    const fontSelects = this.lineControlsContainer.querySelectorAll('select[onchange*="fontFamily"]');
+                    fontSelects.forEach(select => {
+                        select.value = this.fontStyleSelect.value;
+                    });
+                    
+                    this.restartAnimation();
+                });
+                this.textColorInput.addEventListener('change', () => {
+                    // Update all existing line properties with the new global color
+                    this.lineProperties.forEach(lineProp => {
+                        lineProp.color = this.textColorInput.value;
+                    });
+                    this.restartAnimation();
+                });
+                
+                // Global font weight control
+                this.globalFontWeight.addEventListener('input', (e) => {
+                    const value = parseInt(e.target.value);
+                    this.globalFontWeightValue.textContent = value;
+                    this.lineProperties.forEach(lineProp => {
+                        lineProp.fontWeight = value;
+                    });
+                    this.restartAnimation();
+                });
+                
+                // Global font style control
+                this.globalFontStyle.addEventListener('change', () => {
+                    this.lineProperties.forEach(lineProp => {
+                        lineProp.fontStyle = this.globalFontStyle.value;
+                    });
+                    this.restartAnimation();
+                });
+                
+                // Global stroke width control
+                this.globalStrokeWidth.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    this.globalStrokeWidthValue.textContent = value + 'px';
+                    this.lineProperties.forEach(lineProp => {
+                        lineProp.strokeWidth = value;
+                    });
+                    this.restartAnimation();
+                });
+                
+                // Global stroke color control
+                this.globalStrokeColor.addEventListener('change', () => {
+                    this.lineProperties.forEach(lineProp => {
+                        lineProp.strokeColor = this.globalStrokeColor.value;
+                    });
+                    this.restartAnimation();
+                });
+                
+                // Global shadow blur control
+                this.globalShadowBlur.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    this.globalShadowBlurValue.textContent = value + 'px';
+                    this.lineProperties.forEach(lineProp => {
+                        lineProp.shadowBlur = value;
+                    });
+                    this.restartAnimation();
+                });
+                
+                // Global shadow offset X control
+                this.globalShadowOffsetX.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    this.globalShadowOffsetXValue.textContent = value + 'px';
+                    this.lineProperties.forEach(lineProp => {
+                        lineProp.shadowOffsetX = value;
+                    });
+                    this.restartAnimation();
+                });
+                
+                // Global shadow offset Y control
+                this.globalShadowOffsetY.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    this.globalShadowOffsetYValue.textContent = value + 'px';
+                    this.lineProperties.forEach(lineProp => {
+                        lineProp.shadowOffsetY = value;
+                    });
+                    this.restartAnimation();
+                });
+                
+                // Global shadow color control
+                this.globalShadowColor.addEventListener('change', () => {
+                    this.lineProperties.forEach(lineProp => {
+                        lineProp.shadowColor = this.globalShadowColor.value;
+                    });
+                    this.restartAnimation();
+                });
+                this.textAlignSelect.addEventListener('change', () => {
+                    this.restartAnimation();
+                });
+                this.exportBtn.addEventListener('click', () => this.startExport());
+                
+                // Animation speed control
+                this.animationSpeedSlider.addEventListener('input', (e) => {
+                    this.animationSpeed = parseFloat(e.target.value);
+                    this.speedValueSpan.textContent = this.animationSpeed.toFixed(1) + 'x';
+                    this.restartAnimation();
+                });
+                
+                // Zoom level control
+                this.zoomLevelSlider.addEventListener('input', (e) => {
+                    this.zoomLevel = parseFloat(e.target.value);
+                    this.zoomValueSpan.textContent = Math.round(this.zoomLevel * 100) + '%';
+                    this.applyZoom();
+                });
+                
+                // Line height control
+                this.lineHeightSlider.addEventListener('input', (e) => {
+                    this.lineHeightMultiplier = parseFloat(e.target.value);
+                    this.lineHeightValueSpan.textContent = this.lineHeightMultiplier.toFixed(1) + 'x';
+                    this.restartAnimation();
+                });
+                
+                // Handle window resize
+                window.addEventListener('resize', () => {
+                    this.setupHighDPICanvas();
+                });
+            }
+
+            calculateLoopDuration() {
+                const text = this.textInput.value.trim();
+                const currentLines = text.split('\n').filter(line => line.trim() !== '');
+                
+                if (currentLines.length === 0) {
+                    this.loopDuration = 0;
+                    return;
+                }
+                
+                // Calculate the maximum time needed for all lines to appear
+                let maxLineTime = 0;
+                currentLines.forEach((line, index) => {
+                    const lineProps = this.lineProperties[index] || this.getDefaultLineProperties();
+                    const lineTime = (index * this.lineDuration) / lineProps.speed + this.fadeInDuration / lineProps.speed;
+                    maxLineTime = Math.max(maxLineTime, lineTime);
+                });
+                
+                // Add end delay and convert to seconds
+                this.loopDuration = maxLineTime + this.endDelay;
+            }
+
+            restartAnimation() {
+                this.calculateLoopDuration();
+                this.animationTime = 0; // Reset to start
+                this.startAnimation();
+            }
+
+            applyZoom() {
+                const canvasContainer = this.canvas.parentElement;
+                const baseWidth = canvasContainer.clientWidth - 40;
+                const baseHeight = baseWidth * (9/16); // Fixed 16:9 aspect ratio
+                
+                const zoomedWidth = baseWidth * this.zoomLevel;
+                const zoomedHeight = baseHeight * this.zoomLevel;
+                
+                this.canvas.style.width = zoomedWidth + 'px';
+                this.canvas.style.height = zoomedHeight + 'px';
+            }
+
+            getDefaultLineProperties() {
+                return {
+                    speed: 1.0,
+                    fontFamily: this.fontStyleSelect.value,
+                    fontWeight: parseInt(this.globalFontWeight.value),
+                    fontStyle: this.globalFontStyle.value,
+                    color: this.textColorInput.value,
+                    strokeWidth: parseFloat(this.globalStrokeWidth.value),
+                    strokeColor: this.globalStrokeColor.value,
+                    shadowBlur: parseFloat(this.globalShadowBlur.value),
+                    shadowOffsetX: parseFloat(this.globalShadowOffsetX.value),
+                    shadowOffsetY: parseFloat(this.globalShadowOffsetY.value),
+                    shadowColor: this.globalShadowColor.value
+                };
+            }
+
+            getFontSize() {
+                const text = this.textInput.value.trim();
+                const lines = text.split('\n').filter(line => line.trim() !== '');
+                const lineCount = Math.max(1, lines.length);
+                
+                const canvasWidth = this.canvas.width / (window.devicePixelRatio || 1);
+                const canvasHeight = this.canvas.height / (window.devicePixelRatio || 1);
+                const baseFontSize = canvasWidth * 0.15; // Increased base font size for better quality
+                
+                const availableHeight = canvasHeight * 0.8; // Use 80% of canvas height
+                const lineSpacing = this.lineHeightMultiplier;
+                const optimalFontSize = (availableHeight / lineCount) / lineSpacing;
+                
+                let fontSize;
+                if (lineCount <= 1) {
+                    fontSize = baseFontSize;
+                } else if (lineCount <= 3) {
+                    fontSize = Math.min(baseFontSize * 0.9, optimalFontSize);
+                } else if (lineCount <= 5) {
+                    fontSize = Math.min(baseFontSize * 0.75, optimalFontSize);
+                } else if (lineCount <= 10) {
+                    fontSize = Math.min(baseFontSize * 0.6, optimalFontSize);
+                } else if (lineCount <= 15) {
+                    fontSize = Math.min(baseFontSize * 0.5, optimalFontSize);
+                } else if (lineCount <= 20) {
+                    fontSize = Math.min(baseFontSize * 0.45, optimalFontSize);
+                } else {
+                    fontSize = Math.min(baseFontSize * 0.4, optimalFontSize);
+                }
+                
+                fontSize = fontSize * this.lineHeightMultiplier;
+                const minFontSize = 16;
+                fontSize = Math.max(minFontSize, fontSize);
+                return fontSize;
+            }
+
+            generateLineControls() {
+                const text = this.textInput.value.trim();
+                const currentLines = text.split('\n').filter(line => line.trim() !== '');
+                
+                // Update line properties array
+                while (this.lineProperties.length < currentLines.length) {
+                    this.lineProperties.push(this.getDefaultLineProperties());
+                }
+                this.lineProperties = this.lineProperties.slice(0, currentLines.length);
+                
+                // Generate HTML for line controls
+                this.lineControlsContainer.innerHTML = '';
+                
+                currentLines.forEach((line, index) => {
+                    const lineControl = this.createLineControl(line, index);
+                    this.lineControlsContainer.appendChild(lineControl);
+                });
+                
+                // Resize canvas based on new line count
+                this.setupHighDPICanvas();
+                
+                // Restart animation when line controls are generated
+                this.restartAnimation();
+            }
+
+            createLineControl(lineText, index) {
+                const lineProps = this.lineProperties[index] || this.getDefaultLineProperties();
+                const div = document.createElement('div');
+                div.className = 'line-control-item';
+                div.innerHTML = `
+                    <div class="line-header" onclick="this.nextElementSibling.classList.toggle('expanded'); this.querySelector('.expand-icon').style.transform = this.nextElementSibling.classList.contains('expanded') ? 'rotate(180deg)' : 'rotate(0deg)'">
+                        <span class="line-preview">Line ${index + 1}: "${lineText}"</span>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <div class="line-controls-content">
+                        <div class="line-control-group">
+                            <div class="control-group">
+                                <label>Speed</label>
+                                <input type="range" min="0.5" max="3" step="0.1" value="${lineProps.speed}" onchange="textGreenScreen.updateLineProperty(${index}, 'speed', parseFloat(this.value))">
+                                <span>${lineProps.speed}x</span>
+                            </div>
+                            <div class="control-group">
+                                <label>Font Weight</label>
+                                <input type="range" min="100" max="900" step="100" value="${lineProps.fontWeight}" onchange="textGreenScreen.updateLineProperty(${index}, 'fontWeight', parseInt(this.value))">
+                                <span>${lineProps.fontWeight}</span>
+                            </div>
+                        </div>
+                        <div class="line-control-group">
+                            <div class="control-group">
+                                <label>Font Family</label>
+                                <select onchange="textGreenScreen.updateLineProperty(${index}, 'fontFamily', this.value)">
+                                    <option value="Inter" ${lineProps.fontFamily === 'Inter' ? 'selected' : ''}>Inter</option>
+                                    <option value="Bebas Neue" ${lineProps.fontFamily === 'Bebas Neue' ? 'selected' : ''}>Bebas Neue</option>
+                                    <option value="Helvetica" ${lineProps.fontFamily === 'Helvetica' ? 'selected' : ''}>Helvetica</option>
+                                    <option value="Futura" ${lineProps.fontFamily === 'Futura' ? 'selected' : ''}>Futura</option>
+                                    <option value="Arial" ${lineProps.fontFamily === 'Arial' ? 'selected' : ''}>Arial</option>
+                                    <option value="Oswald" ${lineProps.fontFamily === 'Oswald' ? 'selected' : ''}>Oswald</option>
+                                    <option value="Gotham" ${lineProps.fontFamily === 'Gotham' ? 'selected' : ''}>Gotham</option>
+                                    <option value="Montserrat" ${lineProps.fontFamily === 'Montserrat' ? 'selected' : ''}>Montserrat</option>
+                                    <option value="Raleway" ${lineProps.fontFamily === 'Raleway' ? 'selected' : ''}>Raleway</option>
+                                    <option value="Anton" ${lineProps.fontFamily === 'Anton' ? 'selected' : ''}>Anton</option>
+                                    <option value="Roboto" ${lineProps.fontFamily === 'Roboto' ? 'selected' : ''}>Roboto</option>
+                                    <option value="Lato" ${lineProps.fontFamily === 'Lato' ? 'selected' : ''}>Lato</option>
+                                    <option value="Playfair Display" ${lineProps.fontFamily === 'Playfair Display' ? 'selected' : ''}>Playfair Display</option>
+                                    <option value="Eurostile" ${lineProps.fontFamily === 'Eurostile' ? 'selected' : ''}>Eurostile</option>
+                                    <option value="Impact" ${lineProps.fontFamily === 'Impact' ? 'selected' : ''}>Impact</option>
+                                    <option value="Lucida Grande" ${lineProps.fontFamily === 'Lucida Grande' ? 'selected' : ''}>Lucida Grande</option>
+                                    <option value="Tahoma" ${lineProps.fontFamily === 'Tahoma' ? 'selected' : ''}>Tahoma</option>
+                                    <option value="Cinzel" ${lineProps.fontFamily === 'Cinzel' ? 'selected' : ''}>Cinzel</option>
+                                    <option value="League Gothic" ${lineProps.fontFamily === 'League Gothic' ? 'selected' : ''}>League Gothic</option>
+                                    <option value="Morganite" ${lineProps.fontFamily === 'Morganite' ? 'selected' : ''}>Morganite</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label>Font Style</label>
+                                <div class="font-style-controls">
+                                    <button class="style-button ${lineProps.fontStyle === 'normal' ? 'active' : ''}" onclick="textGreenScreen.toggleFontStyle(${index}, 'normal')">Normal</button>
+                                    <button class="style-button ${lineProps.fontStyle === 'italic' ? 'active' : ''}" onclick="textGreenScreen.toggleFontStyle(${index}, 'italic')">Italic</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="line-control-group">
+                            <div class="control-group">
+                                <label>Color</label>
+                                <input type="color" value="${lineProps.color}" onchange="textGreenScreen.updateLineProperty(${index}, 'color', this.value)">
+                            </div>
+                            <div class="control-group">
+                                <label>Stroke Width</label>
+                                <input type="range" min="0" max="10" step="0.5" value="${lineProps.strokeWidth}" onchange="textGreenScreen.updateLineProperty(${index}, 'strokeWidth', parseFloat(this.value))">
+                                <span>${lineProps.strokeWidth}px</span>
+                            </div>
+                            <div class="control-group">
+                                <label>Stroke Color</label>
+                                <input type="color" value="${lineProps.strokeColor}" onchange="textGreenScreen.updateLineProperty(${index}, 'strokeColor', this.value)">
+                            </div>
+                        </div>
+                        <div class="line-control-group">
+                            <div class="control-group">
+                                <label>Shadow Blur</label>
+                                <input type="range" min="0" max="20" step="0.5" value="${lineProps.shadowBlur}" onchange="textGreenScreen.updateLineProperty(${index}, 'shadowBlur', parseFloat(this.value))">
+                                <span>${lineProps.shadowBlur}px</span>
+                            </div>
+                            <div class="control-group">
+                                <label>Shadow Offset X</label>
+                                <input type="range" min="-10" max="10" step="0.5" value="${lineProps.shadowOffsetX}" onchange="textGreenScreen.updateLineProperty(${index}, 'shadowOffsetX', parseFloat(this.value))">
+                                <span>${lineProps.shadowOffsetX}px</span>
+                            </div>
+                            <div class="control-group">
+                                <label>Shadow Offset Y</label>
+                                <input type="range" min="-10" max="10" step="0.5" value="${lineProps.shadowOffsetY}" onchange="textGreenScreen.updateLineProperty(${index}, 'shadowOffsetY', parseFloat(this.value))">
+                                <span>${lineProps.shadowOffsetY}px</span>
+                            </div>
+                            <div class="control-group">
+                                <label>Shadow Color</label>
+                                <input type="color" value="${lineProps.shadowColor}" onchange="textGreenScreen.updateLineProperty(${index}, 'shadowColor', this.value)">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return div;
+            }
+
+            updateLineProperty(lineIndex, property, value) {
+                if (this.lineProperties[lineIndex]) {
+                    this.lineProperties[lineIndex][property] = value;
+                    this.restartAnimation();
+                }
+            }
+
+            toggleFontStyle(lineIndex, style) {
+                if (this.lineProperties[lineIndex]) {
+                    this.lineProperties[lineIndex].fontStyle = style;
+                    this.restartAnimation();
+                }
+            }
+
+            drawText() {
+                this.ctx.imageSmoothingEnabled = true;
+                this.ctx.imageSmoothingQuality = 'high';
+                this.ctx.textRenderingOptimization = 'optimizeQuality';
+                this.ctx.fontKerning = 'normal';
+                this.ctx.fontVariantCaps = 'normal';
+                
+                this.ctx.fillStyle = '#00FF00';
+                const canvasWidth = this.canvas.width / (window.devicePixelRatio || 1);
+                const canvasHeight = this.canvas.height / (window.devicePixelRatio || 1);
+                this.ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+                
+                const text = this.textInput.value.trim();
+                if (!text) {
+                    // Show placeholder text
+                    this.ctx.fillStyle = '#FFFFFF';
+                    this.ctx.font = `bold ${this.getFontSize()}px ${this.fontStyleSelect.value}`;
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText('Type your text above...', canvasWidth / 2, canvasHeight / 2);
+                    return;
+                }
+                
+                // Update lines array when text changes
+                const currentLines = text.split('\n').filter(line => line.trim() !== '');
+                if (JSON.stringify(currentLines) !== JSON.stringify(this.lines)) {
+                    this.lines = currentLines;
+                    this.animationTime = 0;
+                }
+                if (this.lines.length === 0) return;
+                
+                // Set text properties
+                this.ctx.fillStyle = this.textColorInput.value;
+                this.ctx.font = `bold ${this.getFontSize()}px ${this.fontStyleSelect.value}`;
+                this.ctx.textAlign = this.textAlignSelect.value;
+                this.ctx.textBaseline = 'middle';
+                
+                // Add text shadow for better quality
+                this.ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                this.ctx.shadowBlur = this.getFontSize() * 0.02;
+                this.ctx.shadowOffsetX = this.getFontSize() * 0.01;
+                this.ctx.shadowOffsetY = this.getFontSize() * 0.01;
+                
+                // Calculate text position based on alignment
+                let x, y;
+                y = canvasHeight / 2;
+                
+                switch (this.textAlignSelect.value) {
+                    case 'left':
+                        x = canvasWidth * 0.1;
+                        break;
+                    case 'right':
+                        x = canvasWidth * 0.9;
+                        break;
+                    default: // center
+                        x = canvasWidth / 2;
+                        break;
+                }
+                
+                // Calculate line positions
+                const lineSpacing = this.getFontSize() * this.lineHeightMultiplier;
+                const startY = y - (this.lines.length - 1) * lineSpacing / 2;
+                
+                // Draw lines with fade-in animation and per-line properties
+                this.lines.forEach((line, index) => {
+                    const lineProps = this.lineProperties[index] || this.getDefaultLineProperties();
+                    const lineStartTime = index * this.lineDuration / lineProps.speed;
+                    
+                    if (this.animationTime >= lineStartTime) {
+                        // Calculate fade-in progress
+                        let alpha = 1;
+                        if (this.animationTime < lineStartTime + this.fadeInDuration / lineProps.speed) {
+                            // Fade in
+                            const fadeProgress = (this.animationTime - lineStartTime) / (this.fadeInDuration / lineProps.speed);
+                            alpha = Math.min(1, fadeProgress);
+                        }
+                        // No fade out - lines stay visible once they appear
+                        
+                        // Set per-line text properties with improved rendering
+                        console.log(`Preview Line ${index} color:`, lineProps.color, 'font:', lineProps.fontFamily);
+                        this.ctx.fillStyle = lineProps.color;
+                        this.ctx.font = `${lineProps.fontStyle} ${lineProps.fontWeight} ${this.getFontSize()}px ${lineProps.fontFamily}`;
+                        this.ctx.textAlign = this.textAlignSelect.value;
+                        this.ctx.textBaseline = 'middle';
+                        
+                        this.ctx.textRenderingOptimization = 'optimizeQuality';
+                        this.ctx.fontKerning = 'normal';
+                        
+                        // Apply stroke if specified
+                        if (lineProps.strokeWidth > 0) {
+                            this.ctx.strokeStyle = lineProps.strokeColor;
+                            this.ctx.lineWidth = lineProps.strokeWidth;
+                        }
+                        
+                        // Apply shadow if specified
+                        if (lineProps.shadowBlur > 0) {
+                            this.ctx.shadowColor = lineProps.shadowColor;
+                            this.ctx.shadowBlur = lineProps.shadowBlur;
+                            this.ctx.shadowOffsetX = lineProps.shadowOffsetX;
+                            this.ctx.shadowOffsetY = lineProps.shadowOffsetY;
+                        }
+                        
+                        this.ctx.globalAlpha = alpha;
+                        
+                        // Draw stroke first if specified
+                        if (lineProps.strokeWidth > 0) {
+                            this.ctx.strokeText(line, x, startY + index * lineSpacing);
+                        }
+                        
+                        // Draw fill text
+                        this.ctx.fillText(line, x, startY + index * lineSpacing);
+                        
+                        // Reset properties
+                        this.ctx.globalAlpha = 1;
+                        this.ctx.strokeStyle = 'transparent';
+                        this.ctx.lineWidth = 0;
+                        this.ctx.shadowColor = 'transparent';
+                        this.ctx.shadowBlur = 0;
+                        this.ctx.shadowOffsetX = 0;
+                        this.ctx.shadowOffsetY = 0;
+                    }
+                });
+                
+                // Reset shadow
+                this.ctx.shadowColor = 'transparent';
+                this.ctx.shadowBlur = 0;
+                this.ctx.shadowOffsetX = 0;
+                this.ctx.shadowOffsetY = 0;
+            }
+
+            updateExportStatus(message, show = true) {
+                this.exportStatusText.textContent = message;
+                this.exportStatus.style.display = show ? 'inline-flex' : 'none';
+            }
+
+            startExport() {
+                if (this.isExporting) {
+                    console.warn('Export already in progress');
+                    return;
+                }
+                
+                const text = this.textInput.value.trim();
+                if (!text) {
+                    alert('Please enter some text before exporting');
+                    return;
+                }
+                
+                // Calculate duration based on number of lines and per-line speeds
+                const lines = text.split('\n').filter(line => line.trim() !== '');
+                let maxLineTime = 0;
+                lines.forEach((line, index) => {
+                    const lineProps = this.lineProperties[index] || this.getDefaultLineProperties();
+                    const lineTime = (index * this.lineDuration) / lineProps.speed + this.fadeInDuration / lineProps.speed;
+                    maxLineTime = Math.max(maxLineTime, lineTime);
+                });
+                const animationDuration = maxLineTime / this.animationSpeed;
+                const totalDuration = animationDuration + this.endDelay;
+                console.log(`Exporting ${lines.length} lines at ${this.animationSpeed}x speed, duration: ${totalDuration} seconds`);
+
+                // Set export state
+                this.isExporting = true;
+                this.shouldLoop = false; // Disable looping during export
+
+                // Disable export button during recording
+                this.exportBtn.disabled = true;
+                this.exportBtn.innerHTML = '<span>🔴 Recording...</span>';
+                this.updateExportStatus('Initializing 4K ultra high-quality recording...');
+
+                const exportCanvas = document.createElement('canvas');
+                const exportCtx = exportCanvas.getContext('2d');
+                
+                exportCanvas.width = 3840;  // 4K width (16:9) - stable resolution
+                exportCanvas.height = 2160; // 4K height (16:9) - stable resolution
+                
+                console.log(`Export canvas: ${exportCanvas.width}x${exportCanvas.height} (16:9) for ${lines.length} lines`);
+                
+                const devicePixelRatio = window.devicePixelRatio || 1;
+                exportCtx.scale(devicePixelRatio, devicePixelRatio);
+                exportCtx.imageSmoothingEnabled = true;
+                exportCtx.imageSmoothingQuality = 'high';
+                
+                this.drawHighQualityExportFrame(exportCtx, exportCanvas.width / devicePixelRatio, exportCanvas.height / devicePixelRatio, 0);
+                
+                const imageData = exportCtx.getImageData(0, 0, exportCanvas.width, exportCanvas.height);
+                const hasContent = imageData.data.some(pixel => pixel !== 0);
+                console.log('Canvas has content:', hasContent);
+                
+                exportCanvas.style.position = 'absolute';
+                exportCanvas.style.left = '-9999px';
+                exportCanvas.style.top = '-9999px';
+                document.body.appendChild(exportCanvas);
+                
+                let stream = exportCanvas.captureStream(60); // 60fps
+                console.log('Export canvas stream created:', stream);
+                console.log('Export canvas dimensions:', exportCanvas.width, 'x', exportCanvas.height);
+
+                let options = {};
+                
+                // Try MP4 codecs first with high bitrates
+                const mp4Codecs = [
+                    'video/mp4;codecs=h264',
+                    'video/mp4',
+                    'video/webm;codecs=h264'
+                ];
+                
+                for (const codec of mp4Codecs) {
+                    if (MediaRecorder.isTypeSupported(codec)) {
+                        options = {
+                            mimeType: codec,
+                            videoBitsPerSecond: 20000000 // 20 Mbps for ultra high quality
+                        };
+                        break;
+                    }
+                }
+                
+                // Fallback to WebM if MP4 not supported
+                if (!options.mimeType) {
+                    const webmCodecs = [
+                        'video/webm;codecs=vp9',
+                        'video/webm;codecs=vp8',
+                        'video/webm'
+                    ];
+                    
+                    for (const codec of webmCodecs) {
+                        if (MediaRecorder.isTypeSupported(codec)) {
+                            options = {
+                                mimeType: codec,
+                                videoBitsPerSecond: 8000000 // 8 Mbps for VP9
+                            };
+                            break;
+                        }
+                    }
+                }
+                
+                // Final fallback
+                if (!options.mimeType) {
+                    options = {
+                        mimeType: 'video/webm',
+                        videoBitsPerSecond: 2000000 // 2 Mbps fallback
+                    };
+                }
+
+                let recorder;
+                try {
+                    console.log('Creating MediaRecorder with options:', options);
+                    console.log('Stream details:', stream);
+                    console.log('Stream tracks:', stream.getTracks());
+                    recorder = new MediaRecorder(stream, options);
+                    console.log('MediaRecorder created successfully');
+                } catch (error) {
+                    console.error('Failed to create MediaRecorder:', error);
+                    alert('Export failed: MediaRecorder not supported. Please try a different browser.');
+                    this.exportBtn.disabled = false;
+                    this.exportBtn.innerHTML = '<span>🎬 Export as MP4</span>';
+                    this.isExporting = false;
+                    this.shouldLoop = true; // Re-enable looping
+                    document.body.removeChild(exportCanvas);
+                    return;
+                }
+                
+                let chunks = [];
+
+                recorder.ondataavailable = e => {
+                    if (e.data.size > 0) {
+                        chunks.push(e.data);
+                    }
+                };
+                
+                recorder.onerror = (event) => {
+                    console.error('MediaRecorder error:', event.error);
+                    alert('Export failed: Recording error occurred. Please try again.');
+                    this.exportBtn.disabled = false;
+                    this.exportBtn.innerHTML = '<span>🎬 Export as MP4</span>';
+                    this.isExporting = false;
+                    this.shouldLoop = true; // Re-enable looping
+                    document.body.removeChild(exportCanvas);
+                };
+                
+                recorder.onstart = () => {
+                    this.updateExportStatus(`Recording 4K ultra high-quality text animation...`);
+                    console.log('4K ultra high-quality recording started with mimeType:', options.mimeType);
+                    this.animationTime = 0;
+                    this.startHighQualityRendering(exportCtx, exportCanvas.width / devicePixelRatio, exportCanvas.height / devicePixelRatio, totalDuration);
+                };
+                
+                recorder.onstop = () => {
+                    this.updateExportStatus('Processing video...');
+                    console.log('Recording stopped, chunks:', chunks.length);
+                    
+                    // Cleanup: Stop the canvas stream to free resources
+                    stream.getTracks().forEach(track => track.stop());
+                    document.body.removeChild(exportCanvas);
+                    
+                    if (chunks.length === 0) {
+                        console.error('No video data recorded');
+                        alert('Export failed: No video data was recorded. Please try again.');
+                        this.exportBtn.disabled = false;
+                        this.exportBtn.innerHTML = '<span>🎬 Export as MP4</span>';
+                        this.isExporting = false;
+                        this.shouldLoop = true; // Re-enable looping
+                        return;
+                    }
+                    
+                    // Determine file extension based on the actual mime type
+                    const mimeType = recorder.mimeType || 'video/webm';
+                    const isMP4 = mimeType.includes('mp4') || mimeType.includes('h264');
+                    const fileExtension = isMP4 ? 'mp4' : 'webm';
+                    const fileName = `text-green-screen-4k-${Date.now()}.${fileExtension}`;
+                    
+                    let blob = new Blob(chunks, { type: mimeType });
+                    console.log('Blob created:', blob.size, 'bytes, type:', blob.type);
+                    
+                    let url = URL.createObjectURL(blob);
+                    let a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    a.click();
+                    
+                    // Cleanup: Revoke URL immediately after download
+                    setTimeout(() => {
+                        URL.revokeObjectURL(url);
+                    }, 1000);
+
+                    // Cleanup: Clear references to prevent memory leaks
+                    recorder = null;
+                    chunks = null;
+                    stream = null;
+
+                    // Re-enable export button
+                    this.exportBtn.disabled = false;
+                    this.exportBtn.innerHTML = '<span>🎬 Export as MP4</span>';
+                    this.updateExportStatus('4K ultra high-quality video exported successfully! ✨');
+                    
+                    // Reset export state
+                    this.isExporting = false;
+                    this.shouldLoop = true; // Re-enable looping
+                    
+                    setTimeout(() => this.updateExportStatus('', false), 3000);
+                };
+
+                // Start recording with a small delay to ensure everything is ready
+                setTimeout(() => {
+                    try {
+                recorder.start();
+                    } catch (error) {
+                        console.error('Failed to start recording:', error);
+                        alert('Export failed: Could not start recording. Please try again.');
+                        this.exportBtn.disabled = false;
+                        this.exportBtn.innerHTML = '<span>🎬 Export as MP4</span>';
+                        this.isExporting = false;
+                        this.shouldLoop = true; // Re-enable looping
+                        document.body.removeChild(exportCanvas);
+                    }
+                }, 100);
+                
+                // Export for calculated duration based on number of lines
+                setTimeout(() => {
+                    this.updateExportStatus('Finishing recording...');
+                    if (recorder.state === 'recording') {
+                        recorder.stop();
+                    }
+                }, totalDuration * 1000); // Convert to milliseconds
+            }
+
+            startHighQualityRendering(exportCtx, width, height, totalDuration) {
+                const startTime = Date.now();
+                const renderFrame = () => {
+                    if (!this.isExporting) return;
+                    const currentTime = Date.now();
+                    const elapsed = (currentTime - startTime) / 1000;
+                    const animationTime = elapsed * this.animationSpeed;
+                    this.drawHighQualityExportFrame(exportCtx, width, height, animationTime);
+                    if (elapsed < totalDuration) {
+                        requestAnimationFrame(renderFrame);
+                    }
+                };
+                renderFrame();
+            }
+
+            drawHighQualityExportFrame(ctx, width, height, animationTime) {
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.textRenderingOptimization = 'optimizeQuality';
+                ctx.fontKerning = 'normal';
+                ctx.fontVariantCaps = 'normal';
+                ctx.textBaseline = 'middle';
+                ctx.textAlign = 'center';
+                
+                ctx.fillStyle = '#00FF00';
+                ctx.fillRect(0, 0, width, height);
+                
+                const text = this.textInput.value.trim();
+                if (!text) return;
+                const lines = text.split('\n').filter(line => line.trim() !== '');
+                if (lines.length === 0) return;
+                
+                const fontSize = this.getFontSizeForExport(width, height);
+                const lineHeight = fontSize * this.lineHeightMultiplier;
+                
+                const totalTextHeight = lines.length * lineHeight;
+                const startY = height / 2 - totalTextHeight / 2 + lineHeight / 2;
+                let x;
+                switch (this.textAlignSelect.value) {
+                    case 'left':
+                        x = width * 0.1;
+                        break;
+                    case 'right':
+                        x = width * 0.9;
+                        break;
+                    default: // center
+                        x = width / 2;
+                        break;
+                }
+                
+                // Draw lines with EXACT same logic as preview canvas
+                lines.forEach((line, index) => {
+                    const lineProps = this.lineProperties[index] || this.getDefaultLineProperties();
+                    const lineStartTime = index * this.lineDuration / lineProps.speed;
+                    
+                    // Check if this line should be visible (same logic as preview)
+                    if (animationTime < lineStartTime) {
+                        return; // Line not visible yet
+                    }
+                    
+                    // Calculate alpha for fade-in effect (same logic as preview)
+                    let alpha = 1;
+                    if (animationTime < lineStartTime + this.fadeInDuration / lineProps.speed) {
+                        // Fade in (same logic as preview)
+                        const fadeProgress = (animationTime - lineStartTime) / (this.fadeInDuration / lineProps.speed);
+                        alpha = Math.min(1, fadeProgress);
+                    }
+                    // No fade out - lines stay visible once they appear (same as preview)
+                    
+                    // Set per-line text properties with improved rendering (same as preview)
+                    console.log(`Export Line ${index} color:`, lineProps.color, 'font:', lineProps.fontFamily);
+                    ctx.fillStyle = lineProps.color;
+                    ctx.font = `${lineProps.fontStyle} ${lineProps.fontWeight} ${fontSize}px ${lineProps.fontFamily}`;
+                    ctx.textAlign = this.textAlignSelect.value;
+                    ctx.textBaseline = 'middle';
+                    
+                    ctx.textRenderingOptimization = 'optimizeQuality';
+                    ctx.fontKerning = 'normal';
+                    ctx.fontVariantCaps = 'normal';
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    
+                    // Apply stroke if specified (same as preview)
+                    if (lineProps.strokeWidth > 0) {
+                        ctx.strokeStyle = lineProps.strokeColor;
+                        ctx.lineWidth = lineProps.strokeWidth;
+                    }
+                    
+                    // Apply shadow if specified (same as preview)
+                    if (lineProps.shadowBlur > 0) {
+                        ctx.shadowColor = lineProps.shadowColor;
+                        ctx.shadowBlur = lineProps.shadowBlur;
+                        ctx.shadowOffsetX = lineProps.shadowOffsetX;
+                        ctx.shadowOffsetY = lineProps.shadowOffsetY;
+                    }
+                    
+                    ctx.globalAlpha = alpha;
+                    
+                    // Draw stroke first if specified (same as preview)
+                    if (lineProps.strokeWidth > 0) {
+                        ctx.strokeText(line, x, startY + index * lineHeight);
+                    }
+                    
+                    // Draw fill text (same as preview)
+                    ctx.fillText(line, x, startY + index * lineHeight);
+                    
+                    // Reset properties (same as preview)
+                    ctx.globalAlpha = 1;
+                    ctx.strokeStyle = 'transparent';
+                    ctx.lineWidth = 0;
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                });
+            }
+
+            getFontSizeForExport(width, height) {
+                const text = this.textInput.value.trim();
+                const lines = text.split('\n').filter(line => line.trim() !== '');
+                const lineCount = Math.max(1, lines.length);
+                
+                const baseFontSize = 300; // Optimized for 4K resolution
+                const availableHeight = height * 0.8;
+                const lineSpacing = this.lineHeightMultiplier;
+                const optimalFontSize = (availableHeight / lineCount) / lineSpacing;
+                
+                let fontSize;
+                if (lineCount <= 1) {
+                    fontSize = baseFontSize;
+                } else if (lineCount <= 3) {
+                    fontSize = Math.min(baseFontSize * 0.9, optimalFontSize);
+                } else if (lineCount <= 5) {
+                    fontSize = Math.min(baseFontSize * 0.75, optimalFontSize);
+                } else if (lineCount <= 10) {
+                    fontSize = Math.min(baseFontSize * 0.6, optimalFontSize);
+                } else if (lineCount <= 15) {
+                    fontSize = Math.min(baseFontSize * 0.5, optimalFontSize);
+                } else if (lineCount <= 20) {
+                    fontSize = Math.min(baseFontSize * 0.45, optimalFontSize);
+                } else {
+                    fontSize = Math.min(baseFontSize * 0.4, optimalFontSize);
+                }
+                
+                fontSize = fontSize * this.lineHeightMultiplier;
+                const minFontSize = 60; // Optimized for 4K resolution
+                fontSize = Math.max(minFontSize, fontSize);
+                return fontSize;
+            }
         }
-        
-        drawNumber(current);
-        
-        if (progress < 1) {
-          requestAnimationFrame(step);
-        } else {
-          // Ensure we end exactly on the target number
-          drawNumber(end);
-          animationComplete = true;
-          callback && callback();
-        }
-      }
-      requestAnimationFrame(step);
-      
-      // Return a promise that resolves when animation is complete
-      return new Promise((resolve) => {
-        const checkComplete = () => {
-          if (animationComplete) {
-            resolve();
-          } else {
-            setTimeout(checkComplete, 10);
-          }
-        };
-        checkComplete();
-      });
-    }
 
-    function validateInputs() {
-      const start = parseInt(startNumberInput.value);
-      const end = parseInt(endNumberInput.value);
-      const duration = parseFloat(durationInput.value);
-      
-      if (isNaN(start) || isNaN(end) || isNaN(duration)) {
-        alert("Please enter valid numbers for all fields");
-        return false;
-      }
-      
-      if (start >= end) {
-        alert("End number must be greater than start number");
-        return false;
-      }
-      
-      if (duration <= 0) {
-        alert("Duration must be greater than 0");
-        return false;
-      }
-      
-      return true;
-    }
-
-    startBtn.addEventListener("click", () => {
-      if (!validateInputs()) return;
-      
-      // Get user input values
-      const startNum = parseInt(startNumberInput.value);
-      const endNum = parseInt(endNumberInput.value);
-      const durationSeconds = parseFloat(durationInput.value);
-      const durationMs = durationSeconds * 1000;
-      
-      // Disable button during animation
-      startBtn.disabled = true;
-      startBtn.innerHTML = '<span>🔴 Recording...</span>';
-      updateStatus("Initializing recording...");
-      
-      // Capture canvas stream with high quality settings
-      let stream = canvas.captureStream(60); // 60fps
-      
-      // Get export format preference
-      const exportFormat = exportFormatSelect.value;
-      
-      // Try different codec options based on format preference
-      let options = {};
-      
-      if (exportFormat === "mp4") {
-        // Try MP4 codecs first
-        const mp4Codecs = [
-          'video/mp4;codecs=h264',
-          'video/mp4',
-          'video/webm;codecs=h264'
-        ];
+        // Initialize the app when the page loads
+        let textGreenScreen = null;
         
-        for (const codec of mp4Codecs) {
-          if (MediaRecorder.isTypeSupported(codec)) {
-            options = {
-              mimeType: codec,
-              videoBitsPerSecond: 8000000 // 8 Mbps for high quality
-            };
-            break;
-          }
-        }
-      }
-      
-      // Fallback to WebM if MP4 not supported or WebM preferred
-      if (!options.mimeType) {
-        const webmCodecs = [
-          'video/webm;codecs=vp9',
-          'video/webm;codecs=vp8',
-          'video/webm'
-        ];
+        document.addEventListener('DOMContentLoaded', () => {
+            textGreenScreen = new TextGreenScreen();
+        });
         
-        for (const codec of webmCodecs) {
-          if (MediaRecorder.isTypeSupported(codec)) {
-            options = {
-              mimeType: codec,
-              videoBitsPerSecond: exportFormat === "mp4" ? 8000000 : 5000000
-            };
-            break;
-          }
-        }
-      }
-      
-      // Final fallback
-      if (!options.mimeType) {
-        options = {
-          mimeType: 'video/webm',
-          videoBitsPerSecond: 3000000
-        };
-      }
-      
-      let recorder = new MediaRecorder(stream, options);
-      let chunks = [];
-
-      recorder.ondataavailable = e => chunks.push(e.data);
-      recorder.onstop = async () => {
-        updateStatus("Processing video...");
-        let blob = new Blob(chunks, { type: "video/webm" });
-        
-        const exportFormat = exportFormatSelect.value;
-        
-        // Determine file extension based on the actual mime type
-        const mimeType = recorder.mimeType || 'video/webm';
-        const isMP4 = mimeType.includes('mp4') || mimeType.includes('h264');
-        const fileExtension = isMP4 ? 'mp4' : 'webm';
-        const fileName = `number-animation-${startNum}-to-${endNum}-HD.${fileExtension}`;
-        
-        downloadVideo(blob, fileName);
-        
-        // Re-enable button
-        startBtn.disabled = false;
-        startBtn.innerHTML = '<span>🎬 Start Animation & Export</span>';
-        updateStatus("Video exported successfully! ✨");
-        setTimeout(() => updateStatus("", false), 3000);
-      };
-
-      const recordingStartTime = Date.now();
-      recorder.start();
-      updateStatus(`Recording ${startNum} → ${endNum} (${durationSeconds}s)`);
-      
-      // Run the animation with user settings and wait for completion
-      animateNumber(startNum, endNum, durationMs, () => {
-        updateStatus("Animation complete, finishing recording...");
-      }).then(() => {
-        // Calculate exact recording duration to match animation
-        const actualRecordingTime = Date.now() - recordingStartTime;
-        const remainingTime = Math.max(0, durationMs - actualRecordingTime);
-        
-        // Wait for the exact animation duration before stopping
-        setTimeout(() => {
-          updateStatus("Finishing recording...");
-          recorder.stop();
-        }, remainingTime);
-      });
-    });
-    
-    // Preview function to show current settings
-    function previewNumber() {
-      const previewNum = parseInt(endNumberInput.value) || 1000;
-      drawNumber(previewNum);
-      updateStatus("Preview updated", true);
-      setTimeout(() => updateStatus("", false), 1500);
-    }
-    
-    // Add event listeners for live preview
-    fontStyleSelect.addEventListener("change", previewNumber);
-    textColorInput.addEventListener("change", previewNumber);
-    endNumberInput.addEventListener("input", () => {
-      setTimeout(previewNumber, 300); // Debounce for input
-    });
-    
-    // Helper function to download video
-    function downloadVideo(blob, filename) {
-      let url = URL.createObjectURL(blob);
-      let a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-
-
-    // Show welcome status
-    updateStatus("Ready to create amazing animations! 🚀");
-    setTimeout(() => updateStatus("", false), 3000);
-    
-    // Initial preview
-    setTimeout(previewNumber, 500);
-  </script>
-  <script src="shared.js"></script>
+        // Clean up when page is unloaded to prevent memory leaks
+        window.addEventListener('beforeunload', () => {
+            if (textGreenScreen) {
+                textGreenScreen.stopAnimation();
+                textGreenScreen = null;
+            }
+        });
+    </script>
+    <script src="shared.js"></script>
 </body>
 </html>
