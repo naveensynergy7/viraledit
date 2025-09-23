@@ -665,7 +665,7 @@ Smooth Animation</textarea>
                 </select>
             </div>
             
-            <div class="control-group">
+            <div class="control-group" style="display: none;">
                 <label for="animationSpeed">Animation Speed</label>
                 <input type="range" id="animationSpeed" min="0.5" max="5" step="0.1" value="3">
                 <span id="speedValue">3.0x</span>
@@ -885,12 +885,12 @@ Smooth Animation</textarea>
                 });
                 this.exportBtn.addEventListener('click', () => this.startExport());
                 
-                // Animation speed control
-                this.animationSpeedSlider.addEventListener('input', (e) => {
-                    this.animationSpeed = parseFloat(e.target.value);
-                    this.speedValueSpan.textContent = this.animationSpeed.toFixed(1) + 'x';
-                    this.restartAnimation();
-                });
+                // Animation speed control (commented out)
+                // this.animationSpeedSlider.addEventListener('input', (e) => {
+                //     this.animationSpeed = parseFloat(e.target.value);
+                //     this.speedValueSpan.textContent = this.animationSpeed.toFixed(1) + 'x';
+                //     this.restartAnimation();
+                // });
                 
                 
                 // Line height control
@@ -1056,14 +1056,12 @@ Smooth Animation</textarea>
                                     <button class="style-button ${lineProps.fontStyle === 'italic' ? 'active' : ''}" onclick="textGreenScreen.toggleFontStyle(${index}, 'italic')">Italic</button>
                                 </div>
                             </div>
-                            <div class="control-group">
+                            <div style="display: none;" class="control-group">
                                 <label>Speed</label>
                                 <input type="range" min="0.5" max="3" step="0.1" value="${lineProps.speed}" onchange="textGreenScreen.updateLineProperty(${index}, 'speed', parseFloat(this.value))">
                                 <span id="speedValue_${index}">${lineProps.speed}x</span>
                             </div>
-                        </div>
-                        <div class="line-control-group">
-                            <div class="control-group">
+                                                        <div class="control-group">
                                 <label>Colors</label>
                                 <div class="color-controls">
                                     <div class="color-item">
@@ -1076,6 +1074,9 @@ Smooth Animation</textarea>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="line-control-group">
+
                             <div class="control-group">
                                 <label>Stroke Width</label>
                                 <input type="range" min="0" max="10" step="0.5" value="${lineProps.strokeWidth}" onchange="textGreenScreen.updateLineProperty(${index}, 'strokeWidth', parseFloat(this.value))">
@@ -1313,18 +1314,19 @@ Smooth Animation</textarea>
 
                 let options = {};
                 
-                // Try MP4 codecs first with high bitrates
+                // Try MP4 codecs first with high bitrates (QuickTime compatible)
                 const mp4Codecs = [
+                    'video/mp4;codecs=avc1.42E01E', // H.264 Baseline Profile - most compatible
+                    'video/mp4;codecs=avc1.4D401E', // H.264 Main Profile
                     'video/mp4;codecs=h264',
-                    'video/mp4',
-                    'video/webm;codecs=h264'
+                    'video/mp4'
                 ];
                 
                 for (const codec of mp4Codecs) {
                     if (MediaRecorder.isTypeSupported(codec)) {
                         options = {
                             mimeType: codec,
-                            videoBitsPerSecond: 20000000 // 20 Mbps for ultra high quality
+                            videoBitsPerSecond: 15000000 // 15 Mbps for better compatibility
                         };
                         break;
                     }
@@ -1420,7 +1422,7 @@ Smooth Animation</textarea>
                     
                     // Determine file extension based on the actual mime type
                     const mimeType = recorder.mimeType || 'video/webm';
-                    const isMP4 = mimeType.includes('mp4') || mimeType.includes('h264');
+                    const isMP4 = mimeType.includes('mp4') || mimeType.includes('h264') || mimeType.includes('avc1');
                     const fileExtension = isMP4 ? 'mp4' : 'webm';
                     const fileName = `text-green-screen-4k-${Date.now()}.${fileExtension}`;
                     
