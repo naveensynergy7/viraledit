@@ -1037,6 +1037,7 @@ Smooth Animation</textarea>
                 const canvasHeight = this.canvas.height / (window.devicePixelRatio || 1);
                 const baseFontSize = canvasWidth * 0.15; // Increased base font size for better quality
                 
+                // Calculate optimal font size based on vertical space
                 const availableHeight = canvasHeight * 0.8; // Use 80% of canvas height
                 const lineSpacing = this.lineHeightMultiplier;
                 const optimalFontSize = (availableHeight / lineCount) / lineSpacing;
@@ -1059,6 +1060,31 @@ Smooth Animation</textarea>
                 }
                 
                 fontSize = fontSize * this.lineHeightMultiplier;
+                
+                // Now check horizontal constraints for each line and adjust if needed
+                const availableWidth = canvasWidth * 0.9; // Use 90% of canvas width for safety margin
+                let maxRequiredFontSize = fontSize;
+                
+                lines.forEach((line, index) => {
+                    const lineProps = this.lineProperties[index] || this.getDefaultLineProperties();
+                    
+                    // Create a temporary canvas context to measure text width
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.font = `${lineProps.fontStyle} ${lineProps.fontWeight} ${fontSize}px ${lineProps.fontFamily}`;
+                    
+                    const textWidth = tempCtx.measureText(line).width;
+                    
+                    if (textWidth > availableWidth) {
+                        // Calculate the maximum font size that would fit this line
+                        const scaleFactor = availableWidth / textWidth;
+                        const adjustedFontSize = fontSize * scaleFactor;
+                        maxRequiredFontSize = Math.min(maxRequiredFontSize, adjustedFontSize);
+                    }
+                });
+                
+                fontSize = maxRequiredFontSize;
+                
                 const minFontSize = 16;
                 fontSize = Math.max(minFontSize, fontSize);
                 return fontSize;
@@ -1703,6 +1729,8 @@ Smooth Animation</textarea>
                 const lineCount = Math.max(1, lines.length);
                 
                 const baseFontSize = 300; // Optimized for 4K resolution
+                
+                // Calculate optimal font size based on vertical space
                 const availableHeight = height * 0.8;
                 const lineSpacing = this.lineHeightMultiplier;
                 const optimalFontSize = (availableHeight / lineCount) / lineSpacing;
@@ -1725,6 +1753,31 @@ Smooth Animation</textarea>
                 }
                 
                 fontSize = fontSize * this.lineHeightMultiplier;
+                
+                // Now check horizontal constraints for each line and adjust if needed
+                const availableWidth = width * 0.9; // Use 90% of canvas width for safety margin
+                let maxRequiredFontSize = fontSize;
+                
+                lines.forEach((line, index) => {
+                    const lineProps = this.lineProperties[index] || this.getDefaultLineProperties();
+                    
+                    // Create a temporary canvas context to measure text width for export
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.font = `${lineProps.fontStyle} ${lineProps.fontWeight} ${fontSize}px ${lineProps.fontFamily}`;
+                    
+                    const textWidth = tempCtx.measureText(line).width;
+                    
+                    if (textWidth > availableWidth) {
+                        // Calculate the maximum font size that would fit this line
+                        const scaleFactor = availableWidth / textWidth;
+                        const adjustedFontSize = fontSize * scaleFactor;
+                        maxRequiredFontSize = Math.min(maxRequiredFontSize, adjustedFontSize);
+                    }
+                });
+                
+                fontSize = maxRequiredFontSize;
+                
                 const minFontSize = 60; // Optimized for 4K resolution
                 fontSize = Math.max(minFontSize, fontSize);
                 return fontSize;
