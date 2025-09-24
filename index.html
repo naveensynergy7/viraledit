@@ -266,6 +266,30 @@
             background: var(--surface-hover);
         }
 
+        select option {
+            background: #2a2a2a !important;
+            color: #ffffff !important;
+            padding: 8px 12px;
+            border: none;
+        }
+
+        select option:hover {
+            background: #3a3a3a !important;
+            color: #ffffff !important;
+        }
+
+        select option:checked,
+        select option:focus {
+            background: #667eea !important;
+            color: white !important;
+        }
+
+        /* Ensure dropdown list background is dark */
+        select:focus option {
+            background: #2a2a2a !important;
+            color: #ffffff !important;
+        }
+
         input[type="range"] {
             width: 100%;
             height: 6px;
