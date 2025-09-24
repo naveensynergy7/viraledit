@@ -50,6 +50,12 @@ class SiteNavigation {
             </div>
         `;
         
+        // Add mobile menu overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'mobile-menu-overlay';
+        overlay.id = 'mobileMenuOverlay';
+        document.body.appendChild(overlay);
+        
         document.body.insertBefore(header, document.body.firstChild);
     }
 
@@ -97,28 +103,53 @@ class SiteNavigation {
     setupMobileMenu() {
         const mobileToggle = document.getElementById('mobileMenuToggle');
         const navMenu = document.getElementById('navMenu');
+        const overlay = document.getElementById('mobileMenuOverlay');
         
-        if (mobileToggle && navMenu) {
-            mobileToggle.addEventListener('click', () => {
-                navMenu.classList.toggle('active');
+        if (mobileToggle && navMenu && overlay) {
+            const toggleMenu = (show) => {
+                if (show) {
+                    navMenu.classList.add('active');
+                    overlay.classList.add('active');
+                    mobileToggle.innerHTML = '✕';
+                    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                } else {
+                    navMenu.classList.remove('active');
+                    overlay.classList.remove('active');
+                    mobileToggle.innerHTML = '☰';
+                    document.body.style.overflow = ''; // Restore scrolling
+                }
+            };
+
+            mobileToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const isActive = navMenu.classList.contains('active');
-                mobileToggle.innerHTML = isActive ? '✕' : '☰';
+                toggleMenu(!isActive);
             });
 
             // Close mobile menu when clicking on a link
             const navLinks = navMenu.querySelectorAll('.nav-link');
             navLinks.forEach(link => {
                 link.addEventListener('click', () => {
-                    navMenu.classList.remove('active');
-                    mobileToggle.innerHTML = '☰';
+                    toggleMenu(false);
                 });
+            });
+
+            // Close mobile menu when clicking on overlay
+            overlay.addEventListener('click', () => {
+                toggleMenu(false);
             });
 
             // Close mobile menu when clicking outside
             document.addEventListener('click', (e) => {
                 if (!navMenu.contains(e.target) && !mobileToggle.contains(e.target)) {
-                    navMenu.classList.remove('active');
-                    mobileToggle.innerHTML = '☰';
+                    toggleMenu(false);
+                }
+            });
+
+            // Close menu on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+                    toggleMenu(false);
                 }
             });
         }
