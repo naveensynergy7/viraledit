@@ -772,6 +772,22 @@ Smooth Animation</textarea>
                 </select>
             </div>
             
+            <div class="control-group">
+                <label for="globalAnimation">Intro Animation (Global)</label>
+                <select id="globalAnimation">
+                    <option value="fade-in" selected>Fade In</option>
+                    <option value="slide-left">Slide from Left</option>
+                    <option value="slide-right">Slide from Right</option>
+                    <option value="slide-up">Slide from Bottom</option>
+                    <option value="slide-down">Slide from Top</option>
+                    <option value="pop-in">Pop In</option>
+                    <option value="bounce-in">Bounce In</option>
+                    <option value="zoom-in">Zoom In</option>
+                    <option value="flip-in">Flip In</option>
+                    <option value="typewriter">Typewriter</option>
+                </select>
+            </div>
+            
             <div class="control-group" style="display: none;">
                 <label for="animationSpeed">Animation Speed</label>
                 <input type="range" id="animationSpeed" min="0.5" max="5" step="0.1" value="3">
@@ -815,6 +831,7 @@ Smooth Animation</textarea>
                 this.fontStyleSelect = document.getElementById('fontStyle');
                 this.textColorInput = document.getElementById('textColor');
                 this.textAlignSelect = document.getElementById('textAlign');
+                this.globalAnimationSelect = document.getElementById('globalAnimation');
                 
                 // Global font styling controls
                 this.globalFontWeight = document.getElementById('globalFontWeight');
@@ -994,6 +1011,21 @@ Smooth Animation</textarea>
                     });
                     this.restartAnimation();
                 });
+                
+                this.globalAnimationSelect.addEventListener('change', () => {
+                    // Update all existing line properties with the new global animation
+                    this.lineProperties.forEach(lineProp => {
+                        lineProp.animationType = this.globalAnimationSelect.value;
+                    });
+                    
+                    // Update all animation dropdowns in the UI to reflect the global change
+                    const animationSelects = this.lineControlsContainer.querySelectorAll('select[onchange*="animationType"]');
+                    animationSelects.forEach(select => {
+                        select.value = this.globalAnimationSelect.value;
+                    });
+                    
+                    this.restartAnimation();
+                });
                 this.exportBtn.addEventListener('click', () => this.startExport());
                 
                 // Animation speed control (commented out)
@@ -1053,7 +1085,8 @@ Smooth Animation</textarea>
                     color: this.textColorInput.value,
                     strokeWidth: parseFloat(this.globalStrokeWidth.value),
                     strokeColor: this.globalStrokeColor.value,
-                    textAlign: this.textAlignSelect.value
+                    textAlign: this.textAlignSelect.value,
+                    animationType: this.globalAnimationSelect.value
                 };
             }
 
@@ -1250,6 +1283,21 @@ Smooth Animation</textarea>
                                 </select>
                             </div>
                             <div class="control-group">
+                                <label>Intro Animation</label>
+                                <select onchange="textGreenScreen.updateLineProperty(${index}, 'animationType', this.value)">
+                                    <option value="fade-in" ${lineProps.animationType === 'fade-in' ? 'selected' : ''}>Fade In</option>
+                                    <option value="slide-left" ${lineProps.animationType === 'slide-left' ? 'selected' : ''}>Slide from Left</option>
+                                    <option value="slide-right" ${lineProps.animationType === 'slide-right' ? 'selected' : ''}>Slide from Right</option>
+                                    <option value="slide-up" ${lineProps.animationType === 'slide-up' ? 'selected' : ''}>Slide from Bottom</option>
+                                    <option value="slide-down" ${lineProps.animationType === 'slide-down' ? 'selected' : ''}>Slide from Top</option>
+                                    <option value="pop-in" ${lineProps.animationType === 'pop-in' ? 'selected' : ''}>Pop In</option>
+                                    <option value="bounce-in" ${lineProps.animationType === 'bounce-in' ? 'selected' : ''}>Bounce In</option>
+                                    <option value="zoom-in" ${lineProps.animationType === 'zoom-in' ? 'selected' : ''}>Zoom In</option>
+                                    <option value="flip-in" ${lineProps.animationType === 'flip-in' ? 'selected' : ''}>Flip In</option>
+                                    <option value="typewriter" ${lineProps.animationType === 'typewriter' ? 'selected' : ''}>Typewriter</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
                                 <label>Stroke Width</label>
                                 <input type="range" min="0" max="10" step="0.5" value="${lineProps.strokeWidth}" onchange="textGreenScreen.updateLineProperty(${index}, 'strokeWidth', parseFloat(this.value))">
                                 <span id="strokeWidthValue_${index}">${lineProps.strokeWidth}px</span>
@@ -1309,6 +1357,95 @@ Smooth Animation</textarea>
                 }
             }
 
+            getAnimationTransform(animationType, progress, canvasWidth, canvasHeight) {
+                // progress is 0 to 1, where 0 is start of animation, 1 is fully visible
+                const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+                const easeOutBounce = t => {
+                    const n1 = 7.5625;
+                    const d1 = 2.75;
+                    if (t < 1 / d1) {
+                        return n1 * t * t;
+                    } else if (t < 2 / d1) {
+                        return n1 * (t -= 1.5 / d1) * t + 0.75;
+                    } else if (t < 2.5 / d1) {
+                        return n1 * (t -= 2.25 / d1) * t + 0.9375;
+                    } else {
+                        return n1 * (t -= 2.625 / d1) * t + 0.984375;
+                    }
+                };
+
+                let alpha = progress;
+                let translateX = 0;
+                let translateY = 0;
+                let scaleX = 1;
+                let scaleY = 1;
+                let rotation = 0;
+
+                switch (animationType) {
+                    case 'fade-in':
+                        alpha = progress;
+                        break;
+                    
+                    case 'slide-left':
+                        alpha = progress;
+                        translateX = (1 - easeOutCubic(progress)) * canvasWidth;
+                        break;
+                    
+                    case 'slide-right':
+                        alpha = progress;
+                        translateX = -(1 - easeOutCubic(progress)) * canvasWidth;
+                        break;
+                    
+                    case 'slide-up':
+                        alpha = progress;
+                        translateY = (1 - easeOutCubic(progress)) * canvasHeight * 0.5;
+                        break;
+                    
+                    case 'slide-down':
+                        alpha = progress;
+                        translateY = -(1 - easeOutCubic(progress)) * canvasHeight * 0.5;
+                        break;
+                    
+                    case 'pop-in':
+                        alpha = progress;
+                        const popScale = easeOutCubic(progress);
+                        scaleX = scaleY = popScale;
+                        break;
+                    
+                    case 'bounce-in':
+                        alpha = Math.min(1, progress * 1.5);
+                        const bounceScale = easeOutBounce(progress);
+                        scaleX = scaleY = bounceScale;
+                        break;
+                    
+                    case 'zoom-in':
+                        alpha = progress;
+                        const zoomScale = 0.3 + (easeOutCubic(progress) * 0.7);
+                        scaleX = scaleY = zoomScale;
+                        break;
+                    
+                    case 'flip-in':
+                        alpha = progress;
+                        rotation = (1 - easeOutCubic(progress)) * Math.PI;
+                        scaleY = Math.cos(rotation * 0.5);
+                        break;
+                    
+                    case 'typewriter':
+                        alpha = 1;
+                        // Typewriter effect will be handled differently
+                        break;
+                }
+
+                return {
+                    alpha,
+                    translateX,
+                    translateY,
+                    scaleX,
+                    scaleY,
+                    rotation
+                };
+            }
+
             drawText() {
                 this.ctx.imageSmoothingEnabled = true;
                 this.ctx.imageSmoothingQuality = 'high';
@@ -1360,14 +1497,22 @@ Smooth Animation</textarea>
                     const lineStartTime = index * this.lineDuration / lineProps.speed;
                     
                     if (this.animationTime >= lineStartTime) {
-                        // Calculate fade-in progress
-                        let alpha = 1;
+                        // Calculate animation progress
+                        let animationProgress = 1;
                         if (this.animationTime < lineStartTime + this.fadeInDuration / lineProps.speed) {
-                            // Fade in
-                            const fadeProgress = (this.animationTime - lineStartTime) / (this.fadeInDuration / lineProps.speed);
-                            alpha = Math.min(1, fadeProgress);
+                            // Animation in progress
+                            const progress = (this.animationTime - lineStartTime) / (this.fadeInDuration / lineProps.speed);
+                            animationProgress = Math.min(1, progress);
                         }
                         // No fade out - lines stay visible once they appear
+                        
+                        // Get animation transform based on animation type
+                        const transform = this.getAnimationTransform(
+                            lineProps.animationType || 'fade-in',
+                            animationProgress,
+                            canvasWidth,
+                            canvasHeight
+                        );
                         
                         // Set per-line text properties with improved rendering
                         console.log(`Preview Line ${index} color:`, lineProps.color, 'font:', lineProps.fontFamily, 'style:', lineProps.fontStyle);
@@ -1399,21 +1544,66 @@ Smooth Animation</textarea>
                             this.ctx.lineWidth = lineProps.strokeWidth;
                         }
                         
+                        // Save context for transforms
+                        this.ctx.save();
                         
-                        this.ctx.globalAlpha = alpha;
+                        // Apply animation transforms
+                        const textX = x + transform.translateX;
+                        const textY = startY + index * lineSpacing + transform.translateY;
                         
-                        // Draw stroke first if specified
-                        if (lineProps.strokeWidth > 0) {
-                            this.ctx.strokeText(line, x, startY + index * lineSpacing);
+                        this.ctx.globalAlpha = transform.alpha;
+                        
+                        // Apply scaling and rotation transforms
+                        if (transform.scaleX !== 1 || transform.scaleY !== 1 || transform.rotation !== 0) {
+                            this.ctx.translate(textX, textY);
+                            this.ctx.scale(transform.scaleX, transform.scaleY);
+                            if (transform.rotation !== 0) {
+                                this.ctx.rotate(transform.rotation);
+                            }
+                            
+                            // Handle typewriter effect
+                            if (lineProps.animationType === 'typewriter' && animationProgress < 1) {
+                                const visibleChars = Math.floor(line.length * animationProgress);
+                                const visibleText = line.substring(0, visibleChars);
+                                
+                                // Draw stroke first if specified
+                                if (lineProps.strokeWidth > 0) {
+                                    this.ctx.strokeText(visibleText, 0, 0);
+                                }
+                                // Draw fill text
+                                this.ctx.fillText(visibleText, 0, 0);
+                            } else {
+                                // Draw stroke first if specified
+                                if (lineProps.strokeWidth > 0) {
+                                    this.ctx.strokeText(line, 0, 0);
+                                }
+                                // Draw fill text
+                                this.ctx.fillText(line, 0, 0);
+                            }
+                        } else {
+                            // Handle typewriter effect without transforms
+                            if (lineProps.animationType === 'typewriter' && animationProgress < 1) {
+                                const visibleChars = Math.floor(line.length * animationProgress);
+                                const visibleText = line.substring(0, visibleChars);
+                                
+                                // Draw stroke first if specified
+                                if (lineProps.strokeWidth > 0) {
+                                    this.ctx.strokeText(visibleText, textX, textY);
+                                }
+                                // Draw fill text
+                                this.ctx.fillText(visibleText, textX, textY);
+                            } else {
+                                // Draw stroke first if specified
+                                if (lineProps.strokeWidth > 0) {
+                                    this.ctx.strokeText(line, textX, textY);
+                                }
+                                // Draw fill text
+                                this.ctx.fillText(line, textX, textY);
+                            }
                         }
                         
-                        // Draw fill text
-                        this.ctx.fillText(line, x, startY + index * lineSpacing);
-                        
-                        // Reset properties
-                        this.ctx.globalAlpha = 1;
-                        this.ctx.strokeStyle = 'transparent';
-                        this.ctx.lineWidth = 0;
+                        // Restore context
+                        this.ctx.restore();
                     }
                 });
                 
@@ -1702,14 +1892,22 @@ Smooth Animation</textarea>
                         return; // Line not visible yet
                     }
                     
-                    // Calculate alpha for fade-in effect (same logic as preview)
-                    let alpha = 1;
+                    // Calculate animation progress (same logic as preview)
+                    let animationProgress = 1;
                     if (animationTime < lineStartTime + this.fadeInDuration / lineProps.speed) {
-                        // Fade in (same logic as preview)
-                        const fadeProgress = (animationTime - lineStartTime) / (this.fadeInDuration / lineProps.speed);
-                        alpha = Math.min(1, fadeProgress);
+                        // Animation in progress (same logic as preview)
+                        const progress = (animationTime - lineStartTime) / (this.fadeInDuration / lineProps.speed);
+                        animationProgress = Math.min(1, progress);
                     }
                     // No fade out - lines stay visible once they appear (same as preview)
+                    
+                    // Get animation transform based on animation type (same as preview)
+                    const transform = this.getAnimationTransform(
+                        lineProps.animationType || 'fade-in',
+                        animationProgress,
+                        width,
+                        height
+                    );
                     
                     // Set per-line text properties with improved rendering (same as preview)
                     console.log(`Export Line ${index} color:`, lineProps.color, 'font:', lineProps.fontFamily);
@@ -1744,21 +1942,66 @@ Smooth Animation</textarea>
                         ctx.lineWidth = lineProps.strokeWidth;
                     }
                     
+                    // Save context for transforms (same as preview)
+                    ctx.save();
                     
-                    ctx.globalAlpha = alpha;
+                    // Apply animation transforms (same as preview)
+                    const textX = x + transform.translateX;
+                    const textY = startY + index * lineHeight + transform.translateY;
                     
-                    // Draw stroke first if specified (same as preview)
-                    if (lineProps.strokeWidth > 0) {
-                        ctx.strokeText(line, x, startY + index * lineHeight);
+                    ctx.globalAlpha = transform.alpha;
+                    
+                    // Apply scaling and rotation transforms (same as preview)
+                    if (transform.scaleX !== 1 || transform.scaleY !== 1 || transform.rotation !== 0) {
+                        ctx.translate(textX, textY);
+                        ctx.scale(transform.scaleX, transform.scaleY);
+                        if (transform.rotation !== 0) {
+                            ctx.rotate(transform.rotation);
+                        }
+                        
+                        // Handle typewriter effect (same as preview)
+                        if (lineProps.animationType === 'typewriter' && animationProgress < 1) {
+                            const visibleChars = Math.floor(line.length * animationProgress);
+                            const visibleText = line.substring(0, visibleChars);
+                            
+                            // Draw stroke first if specified
+                            if (lineProps.strokeWidth > 0) {
+                                ctx.strokeText(visibleText, 0, 0);
+                            }
+                            // Draw fill text
+                            ctx.fillText(visibleText, 0, 0);
+                        } else {
+                            // Draw stroke first if specified
+                            if (lineProps.strokeWidth > 0) {
+                                ctx.strokeText(line, 0, 0);
+                            }
+                            // Draw fill text
+                            ctx.fillText(line, 0, 0);
+                        }
+                    } else {
+                        // Handle typewriter effect without transforms (same as preview)
+                        if (lineProps.animationType === 'typewriter' && animationProgress < 1) {
+                            const visibleChars = Math.floor(line.length * animationProgress);
+                            const visibleText = line.substring(0, visibleChars);
+                            
+                            // Draw stroke first if specified
+                            if (lineProps.strokeWidth > 0) {
+                                ctx.strokeText(visibleText, textX, textY);
+                            }
+                            // Draw fill text
+                            ctx.fillText(visibleText, textX, textY);
+                        } else {
+                            // Draw stroke first if specified
+                            if (lineProps.strokeWidth > 0) {
+                                ctx.strokeText(line, textX, textY);
+                            }
+                            // Draw fill text
+                            ctx.fillText(line, textX, textY);
+                        }
                     }
                     
-                    // Draw fill text (same as preview)
-                    ctx.fillText(line, x, startY + index * lineHeight);
-                    
-                    // Reset properties (same as preview)
-                    ctx.globalAlpha = 1;
-                    ctx.strokeStyle = 'transparent';
-                    ctx.lineWidth = 0;
+                    // Restore context (same as preview)
+                    ctx.restore();
                 });
             }
 
