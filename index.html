@@ -964,6 +964,10 @@ Smooth Animation</textarea>
                 });
                 
                 this.textAlignSelect.addEventListener('change', () => {
+                    // Update all existing line properties with the new global alignment
+                    this.lineProperties.forEach(lineProp => {
+                        lineProp.textAlign = this.textAlignSelect.value;
+                    });
                     this.restartAnimation();
                 });
                 this.exportBtn.addEventListener('click', () => this.startExport());
@@ -1024,7 +1028,8 @@ Smooth Animation</textarea>
                     fontStyle: this.globalFontStyle.value,
                     color: this.textColorInput.value,
                     strokeWidth: parseFloat(this.globalStrokeWidth.value),
-                    strokeColor: this.globalStrokeColor.value
+                    strokeColor: this.globalStrokeColor.value,
+                    textAlign: this.textAlignSelect.value
                 };
             }
 
@@ -1212,7 +1217,14 @@ Smooth Animation</textarea>
                             </div>
                         </div>
                         <div class="line-control-group">
-
+                            <div class="control-group">
+                                <label>Text Alignment</label>
+                                <select onchange="textGreenScreen.updateLineProperty(${index}, 'textAlign', this.value)">
+                                    <option value="center" ${lineProps.textAlign === 'center' ? 'selected' : ''}>Center</option>
+                                    <option value="left" ${lineProps.textAlign === 'left' ? 'selected' : ''}>Left</option>
+                                    <option value="right" ${lineProps.textAlign === 'right' ? 'selected' : ''}>Right</option>
+                                </select>
+                            </div>
                             <div class="control-group">
                                 <label>Stroke Width</label>
                                 <input type="range" min="0" max="10" step="0.5" value="${lineProps.strokeWidth}" onchange="textGreenScreen.updateLineProperty(${index}, 'strokeWidth', parseFloat(this.value))">
@@ -1311,21 +1323,8 @@ Smooth Animation</textarea>
                 this.ctx.textBaseline = 'middle';
                 
                 
-                // Calculate text position based on alignment
-                let x, y;
-                y = canvasHeight / 2;
-                
-                switch (this.textAlignSelect.value) {
-                    case 'left':
-                        x = canvasWidth * 0.1;
-                        break;
-                    case 'right':
-                        x = canvasWidth * 0.9;
-                        break;
-                    default: // center
-                        x = canvasWidth / 2;
-                        break;
-                }
+                // Calculate vertical position
+                let y = canvasHeight / 2;
                 
                 // Calculate line positions
                 const lineSpacing = this.getFontSize() * this.lineHeightMultiplier;
@@ -1350,8 +1349,22 @@ Smooth Animation</textarea>
                         console.log(`Preview Line ${index} color:`, lineProps.color, 'font:', lineProps.fontFamily, 'style:', lineProps.fontStyle);
                         this.ctx.fillStyle = lineProps.color;
                         this.ctx.font = `${lineProps.fontStyle} ${lineProps.fontWeight} ${this.getFontSize()}px ${lineProps.fontFamily}`;
-                        this.ctx.textAlign = this.textAlignSelect.value;
+                        this.ctx.textAlign = lineProps.textAlign;
                         this.ctx.textBaseline = 'middle';
+                        
+                        // Calculate per-line text position based on alignment
+                        let x;
+                        switch (lineProps.textAlign) {
+                            case 'left':
+                                x = canvasWidth * 0.1;
+                                break;
+                            case 'right':
+                                x = canvasWidth * 0.9;
+                                break;
+                            default: // center
+                                x = canvasWidth / 2;
+                                break;
+                        }
                         
                         this.ctx.textRenderingOptimization = 'optimizeQuality';
                         this.ctx.fontKerning = 'normal';
@@ -1654,18 +1667,6 @@ Smooth Animation</textarea>
                 
                 const totalTextHeight = lines.length * lineHeight;
                 const startY = height / 2 - totalTextHeight / 2 + lineHeight / 2;
-                let x;
-                switch (this.textAlignSelect.value) {
-                    case 'left':
-                        x = width * 0.1;
-                        break;
-                    case 'right':
-                        x = width * 0.9;
-                        break;
-                    default: // center
-                        x = width / 2;
-                        break;
-                }
                 
                 // Draw lines with EXACT same logic as preview canvas
                 lines.forEach((line, index) => {
@@ -1690,8 +1691,22 @@ Smooth Animation</textarea>
                     console.log(`Export Line ${index} color:`, lineProps.color, 'font:', lineProps.fontFamily);
                     ctx.fillStyle = lineProps.color;
                     ctx.font = `${lineProps.fontStyle} ${lineProps.fontWeight} ${fontSize}px ${lineProps.fontFamily}`;
-                    ctx.textAlign = this.textAlignSelect.value;
+                    ctx.textAlign = lineProps.textAlign;
                     ctx.textBaseline = 'middle';
+                    
+                    // Calculate per-line text position based on alignment (same as preview)
+                    let x;
+                    switch (lineProps.textAlign) {
+                        case 'left':
+                            x = width * 0.1;
+                            break;
+                        case 'right':
+                            x = width * 0.9;
+                            break;
+                        default: // center
+                            x = width / 2;
+                            break;
+                    }
                     
                     ctx.textRenderingOptimization = 'optimizeQuality';
                     ctx.fontKerning = 'normal';
