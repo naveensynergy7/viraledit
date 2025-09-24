@@ -784,7 +784,7 @@ Smooth Animation</textarea>
                     <option value="bounce-in">Bounce In</option>
                     <option value="zoom-in">Zoom In</option>
                     <option value="flip-in">Flip In</option>
-                    <option value="typewriter">Typewriter</option>
+                    <option value="typewriter-cursor">Typewriter</option>
                 </select>
             </div>
             
@@ -1323,7 +1323,7 @@ Smooth Animation</textarea>
                                 <input type="range" min="0.5" max="3" step="0.1" value="${lineProps.speed}" onchange="textGreenScreen.updateLineProperty(${index}, 'speed', parseFloat(this.value))">
                                 <span id="speedValue_${index}">${lineProps.speed}x</span>
                             </div>
-                                                        <div class="control-group">
+                            <div class="control-group">
                                 <label>Colors</label>
                                 <div class="color-controls">
                                     <div class="color-item">
@@ -1358,7 +1358,7 @@ Smooth Animation</textarea>
                                     <option value="bounce-in" ${lineProps.animationType === 'bounce-in' ? 'selected' : ''}>Bounce In</option>
                                     <option value="zoom-in" ${lineProps.animationType === 'zoom-in' ? 'selected' : ''}>Zoom In</option>
                                     <option value="flip-in" ${lineProps.animationType === 'flip-in' ? 'selected' : ''}>Flip In</option>
-                                    <option value="typewriter" ${lineProps.animationType === 'typewriter' ? 'selected' : ''}>Typewriter</option>
+                                    <option value="typewriter-cursor" ${lineProps.animationType === 'typewriter-cursor' ? 'selected' : ''}>Typewriter</option>
                                 </select>
                             </div>
                             <div class="control-group">
@@ -1637,16 +1637,28 @@ Smooth Animation</textarea>
                             }
                             
                             // Handle typewriter effect
-                            if (lineProps.animationType === 'typewriter' && animationProgress < 1) {
-                                const visibleChars = Math.floor(line.length * animationProgress);
-                                const visibleText = line.substring(0, visibleChars);
-                                
-                                // Draw stroke first if specified
-                                if (lineProps.strokeWidth > 0) {
-                                    this.ctx.strokeText(visibleText, 0, 0);
+                            if (lineProps.animationType === 'typewriter-cursor') {
+                                if (animationProgress < 1) {
+                                    // Animation in progress - show partial text with cursor
+                                    const visibleChars = Math.floor(line.length * animationProgress);
+                                    const visibleText = line.substring(0, visibleChars);
+                                    
+                                    // Draw stroke first if specified
+                                    if (lineProps.strokeWidth > 0) {
+                                        this.ctx.strokeText(visibleText, 0, 0);
+                                    }
+                                    // Draw fill text
+                                    this.ctx.fillText(visibleText, 0, 0);
+                                    
+                                } else {
+                                    // Animation complete - show full text
+                                    // Draw stroke first if specified
+                                    if (lineProps.strokeWidth > 0) {
+                                        this.ctx.strokeText(line, 0, 0);
+                                    }
+                                    // Draw fill text
+                                    this.ctx.fillText(line, 0, 0);
                                 }
-                                // Draw fill text
-                                this.ctx.fillText(visibleText, 0, 0);
                             } else {
                                 // Draw stroke first if specified
                                 if (lineProps.strokeWidth > 0) {
@@ -1657,16 +1669,28 @@ Smooth Animation</textarea>
                             }
                         } else {
                             // Handle typewriter effect without transforms
-                            if (lineProps.animationType === 'typewriter' && animationProgress < 1) {
-                                const visibleChars = Math.floor(line.length * animationProgress);
-                                const visibleText = line.substring(0, visibleChars);
-                                
-                                // Draw stroke first if specified
-                                if (lineProps.strokeWidth > 0) {
-                                    this.ctx.strokeText(visibleText, textX, textY);
+                            if (lineProps.animationType === 'typewriter-cursor') {
+                                if (animationProgress < 1) {
+                                    // Animation in progress - show partial text with cursor
+                                    const visibleChars = Math.floor(line.length * animationProgress);
+                                    const visibleText = line.substring(0, visibleChars);
+                                    
+                                    // Draw stroke first if specified
+                                    if (lineProps.strokeWidth > 0) {
+                                        this.ctx.strokeText(visibleText, textX, textY);
+                                    }
+                                    // Draw fill text
+                                    this.ctx.fillText(visibleText, textX, textY);
+                                    
+                                } else {
+                                    // Animation complete - show full text
+                                    // Draw stroke first if specified
+                                    if (lineProps.strokeWidth > 0) {
+                                        this.ctx.strokeText(line, textX, textY);
+                                    }
+                                    // Draw fill text
+                                    this.ctx.fillText(line, textX, textY);
                                 }
-                                // Draw fill text
-                                this.ctx.fillText(visibleText, textX, textY);
                             } else {
                                 // Draw stroke first if specified
                                 if (lineProps.strokeWidth > 0) {
@@ -2042,16 +2066,28 @@ Smooth Animation</textarea>
                         }
                         
                         // Handle typewriter effect (same as preview)
-                        if (lineProps.animationType === 'typewriter' && animationProgress < 1) {
-                            const visibleChars = Math.floor(line.length * animationProgress);
-                            const visibleText = line.substring(0, visibleChars);
-                            
-                            // Draw stroke first if specified
-                            if (lineProps.strokeWidth > 0) {
-                                ctx.strokeText(visibleText, 0, 0);
+                        if (lineProps.animationType === 'typewriter-cursor') {
+                            if (animationProgress < 1) {
+                                // Animation in progress - show partial text with cursor
+                                const visibleChars = Math.floor(line.length * animationProgress);
+                                const visibleText = line.substring(0, visibleChars);
+                                
+                                // Draw stroke first if specified
+                                if (lineProps.strokeWidth > 0) {
+                                    ctx.strokeText(visibleText, 0, 0);
+                                }
+                                // Draw fill text
+                                ctx.fillText(visibleText, 0, 0);
+                                
+                            } else {
+                                // Animation complete - show full text
+                                // Draw stroke first if specified
+                                if (lineProps.strokeWidth > 0) {
+                                    ctx.strokeText(line, 0, 0);
+                                }
+                                // Draw fill text
+                                ctx.fillText(line, 0, 0);
                             }
-                            // Draw fill text
-                            ctx.fillText(visibleText, 0, 0);
                         } else {
                             // Draw stroke first if specified
                             if (lineProps.strokeWidth > 0) {
@@ -2062,16 +2098,28 @@ Smooth Animation</textarea>
                         }
                     } else {
                         // Handle typewriter effect without transforms (same as preview)
-                        if (lineProps.animationType === 'typewriter' && animationProgress < 1) {
-                            const visibleChars = Math.floor(line.length * animationProgress);
-                            const visibleText = line.substring(0, visibleChars);
-                            
-                            // Draw stroke first if specified
-                            if (lineProps.strokeWidth > 0) {
-                                ctx.strokeText(visibleText, textX, textY);
+                        if (lineProps.animationType === 'typewriter-cursor') {
+                            if (animationProgress < 1) {
+                                // Animation in progress - show partial text with cursor
+                                const visibleChars = Math.floor(line.length * animationProgress);
+                                const visibleText = line.substring(0, visibleChars);
+                                
+                                // Draw stroke first if specified
+                                if (lineProps.strokeWidth > 0) {
+                                    ctx.strokeText(visibleText, textX, textY);
+                                }
+                                // Draw fill text
+                                ctx.fillText(visibleText, textX, textY);
+                                
+                            } else {
+                                // Animation complete - show full text
+                                // Draw stroke first if specified
+                                if (lineProps.strokeWidth > 0) {
+                                    ctx.strokeText(line, textX, textY);
+                                }
+                                // Draw fill text
+                                ctx.fillText(line, textX, textY);
                             }
-                            // Draw fill text
-                            ctx.fillText(visibleText, textX, textY);
                         } else {
                             // Draw stroke first if specified
                             if (lineProps.strokeWidth > 0) {
