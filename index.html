@@ -788,6 +788,12 @@ Smooth Animation</textarea>
                 </select>
             </div>
             
+            <div class="control-group">
+                <label for="globalAnimationSpeed">Animation Speed (Global)</label>
+                <input type="range" id="globalAnimationSpeed" min="0.2" max="3.0" step="0.1" value="1.0">
+                <span id="globalAnimationSpeedValue">1.0x</span>
+            </div>
+            
             <div class="control-group" style="display: none;">
                 <label for="animationSpeed">Animation Speed</label>
                 <input type="range" id="animationSpeed" min="0.5" max="5" step="0.1" value="3">
@@ -832,6 +838,8 @@ Smooth Animation</textarea>
                 this.textColorInput = document.getElementById('textColor');
                 this.textAlignSelect = document.getElementById('textAlign');
                 this.globalAnimationSelect = document.getElementById('globalAnimation');
+                this.globalAnimationSpeed = document.getElementById('globalAnimationSpeed');
+                this.globalAnimationSpeedValue = document.getElementById('globalAnimationSpeedValue');
                 
                 // Global font styling controls
                 this.globalFontWeight = document.getElementById('globalFontWeight');
@@ -1026,6 +1034,29 @@ Smooth Animation</textarea>
                     
                     this.restartAnimation();
                 });
+                
+                this.globalAnimationSpeed.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    this.globalAnimationSpeedValue.textContent = value.toFixed(1) + 'x';
+                    
+                    // Update all existing line properties with the new global animation speed
+                    this.lineProperties.forEach(lineProp => {
+                        lineProp.animationSpeed = value;
+                    });
+                    
+                    // Update all animation speed sliders in the UI to reflect the global change
+                    const animationSpeedInputs = this.lineControlsContainer.querySelectorAll('input[onchange*="animationSpeed"]');
+                    animationSpeedInputs.forEach(input => {
+                        input.value = value;
+                        const index = input.getAttribute('onchange').match(/\d+/)[0];
+                        const speedSpan = document.getElementById(`animationSpeedValue_${index}`);
+                        if (speedSpan) {
+                            speedSpan.textContent = value.toFixed(1) + 'x';
+                        }
+                    });
+                    
+                    this.restartAnimation();
+                });
                 this.exportBtn.addEventListener('click', () => this.startExport());
                 
                 // Animation speed control (commented out)
@@ -1057,16 +1088,48 @@ Smooth Animation</textarea>
                     return;
                 }
                 
-                // Calculate the maximum time needed for all lines to appear
-                let maxLineTime = 0;
+                // Calculate cumulative time for sequential animations
+                let cumulativeTime = 0;
                 currentLines.forEach((line, index) => {
                     const lineProps = this.lineProperties[index] || this.getDefaultLineProperties();
-                    const lineTime = (index * this.lineDuration) / lineProps.speed + this.fadeInDuration / lineProps.speed;
-                    maxLineTime = Math.max(maxLineTime, lineTime);
+                    const animationDuration = this.fadeInDuration / (lineProps.speed * (lineProps.animationSpeed || 1.0));
+                    const lineDelay = this.lineDuration / lineProps.speed;
+                    
+                    // Each line starts after the previous line's animation completes
+                    if (index === 0) {
+                        cumulativeTime = animationDuration;
+                    } else {
+                        cumulativeTime += lineDelay + animationDuration;
+                    }
                 });
                 
-                // Add end delay and convert to seconds
-                this.loopDuration = maxLineTime + this.endDelay;
+                // Add end delay
+                this.loopDuration = cumulativeTime + this.endDelay;
+            }
+
+            getLineStartTime(lineIndex) {
+                const text = this.textInput.value.trim();
+                const lines = text.split('\n').filter(line => line.trim() !== '');
+                
+                if (lineIndex === 0) {
+                    return 0; // First line starts immediately
+                }
+                
+                // Calculate cumulative time for all previous lines
+                let cumulativeTime = 0;
+                for (let i = 0; i < lineIndex; i++) {
+                    const lineProps = this.lineProperties[i] || this.getDefaultLineProperties();
+                    const animationDuration = this.fadeInDuration / (lineProps.speed * (lineProps.animationSpeed || 1.0));
+                    const lineDelay = this.lineDuration / lineProps.speed;
+                    
+                    if (i === 0) {
+                        cumulativeTime = animationDuration + lineDelay;
+                    } else {
+                        cumulativeTime += animationDuration + lineDelay;
+                    }
+                }
+                
+                return cumulativeTime;
             }
 
             restartAnimation() {
@@ -1086,7 +1149,8 @@ Smooth Animation</textarea>
                     strokeWidth: parseFloat(this.globalStrokeWidth.value),
                     strokeColor: this.globalStrokeColor.value,
                     textAlign: this.textAlignSelect.value,
-                    animationType: this.globalAnimationSelect.value
+                    animationType: this.globalAnimationSelect.value,
+                    animationSpeed: parseFloat(this.globalAnimationSpeed.value)
                 };
             }
 
@@ -1298,6 +1362,11 @@ Smooth Animation</textarea>
                                 </select>
                             </div>
                             <div class="control-group">
+                                <label>Animation Speed</label>
+                                <input type="range" min="0.2" max="3.0" step="0.1" value="${lineProps.animationSpeed}" onchange="textGreenScreen.updateLineProperty(${index}, 'animationSpeed', parseFloat(this.value))">
+                                <span id="animationSpeedValue_${index}">${lineProps.animationSpeed.toFixed(1)}x</span>
+                            </div>
+                            <div class="control-group">
                                 <label>Stroke Width</label>
                                 <input type="range" min="0" max="10" step="0.5" value="${lineProps.strokeWidth}" onchange="textGreenScreen.updateLineProperty(${index}, 'strokeWidth', parseFloat(this.value))">
                                 <span id="strokeWidthValue_${index}">${lineProps.strokeWidth}px</span>
@@ -1327,6 +1396,11 @@ Smooth Animation</textarea>
                         const strokeWidthSpan = document.getElementById(`strokeWidthValue_${lineIndex}`);
                         if (strokeWidthSpan) {
                             strokeWidthSpan.textContent = value + 'px';
+                        }
+                    } else if (property === 'animationSpeed') {
+                        const animationSpeedSpan = document.getElementById(`animationSpeedValue_${lineIndex}`);
+                        if (animationSpeedSpan) {
+                            animationSpeedSpan.textContent = value.toFixed(1) + 'x';
                         }
                     }
                     
@@ -1491,17 +1565,18 @@ Smooth Animation</textarea>
                 const lineSpacing = this.getFontSize() * this.lineHeightMultiplier;
                 const startY = y - (this.lines.length - 1) * lineSpacing / 2;
                 
-                // Draw lines with fade-in animation and per-line properties
+                // Draw lines with sequential animation and per-line properties
                 this.lines.forEach((line, index) => {
                     const lineProps = this.lineProperties[index] || this.getDefaultLineProperties();
-                    const lineStartTime = index * this.lineDuration / lineProps.speed;
+                    const lineStartTime = this.getLineStartTime(index);
                     
                     if (this.animationTime >= lineStartTime) {
-                        // Calculate animation progress
+                        // Calculate animation progress using per-line animation speed
                         let animationProgress = 1;
-                        if (this.animationTime < lineStartTime + this.fadeInDuration / lineProps.speed) {
+                        const animationDuration = this.fadeInDuration / (lineProps.speed * (lineProps.animationSpeed || 1.0));
+                        if (this.animationTime < lineStartTime + animationDuration) {
                             // Animation in progress
-                            const progress = (this.animationTime - lineStartTime) / (this.fadeInDuration / lineProps.speed);
+                            const progress = (this.animationTime - lineStartTime) / animationDuration;
                             animationProgress = Math.min(1, progress);
                         }
                         // No fade out - lines stay visible once they appear
@@ -1626,16 +1701,22 @@ Smooth Animation</textarea>
                     return;
                 }
                 
-                // Calculate duration based on number of lines and per-line speeds
+                // Calculate duration based on sequential line animations
                 const lines = text.split('\n').filter(line => line.trim() !== '');
-                let maxLineTime = 0;
+                let totalAnimationTime = 0;
                 lines.forEach((line, index) => {
                     const lineProps = this.lineProperties[index] || this.getDefaultLineProperties();
-                    const lineTime = (index * this.lineDuration) / lineProps.speed + this.fadeInDuration / lineProps.speed;
-                    maxLineTime = Math.max(maxLineTime, lineTime);
+                    const animationDuration = this.fadeInDuration / (lineProps.speed * (lineProps.animationSpeed || 1.0));
+                    const lineDelay = this.lineDuration / lineProps.speed;
+                    
+                    if (index === 0) {
+                        totalAnimationTime = animationDuration + lineDelay;
+                    } else {
+                        totalAnimationTime += animationDuration + lineDelay;
+                    }
                 });
-                const animationDuration = maxLineTime / this.animationSpeed;
-                const totalDuration = animationDuration + this.endDelay;
+                const exportDuration = totalAnimationTime / this.animationSpeed;
+                const totalDuration = exportDuration + this.endDelay;
                 console.log(`Exporting ${lines.length} lines at ${this.animationSpeed}x speed, duration: ${totalDuration} seconds`);
 
                 // Set export state
@@ -1882,21 +1963,22 @@ Smooth Animation</textarea>
                 const totalTextHeight = lines.length * lineHeight;
                 const startY = height / 2 - totalTextHeight / 2 + lineHeight / 2;
                 
-                // Draw lines with EXACT same logic as preview canvas
+                // Draw lines with EXACT same sequential logic as preview canvas
                 lines.forEach((line, index) => {
                     const lineProps = this.lineProperties[index] || this.getDefaultLineProperties();
-                    const lineStartTime = index * this.lineDuration / lineProps.speed;
+                    const lineStartTime = this.getLineStartTime(index);
                     
                     // Check if this line should be visible (same logic as preview)
                     if (animationTime < lineStartTime) {
                         return; // Line not visible yet
                     }
                     
-                    // Calculate animation progress (same logic as preview)
+                    // Calculate animation progress using per-line animation speed (same logic as preview)
                     let animationProgress = 1;
-                    if (animationTime < lineStartTime + this.fadeInDuration / lineProps.speed) {
+                    const animationDuration = this.fadeInDuration / (lineProps.speed * (lineProps.animationSpeed || 1.0));
+                    if (animationTime < lineStartTime + animationDuration) {
                         // Animation in progress (same logic as preview)
-                        const progress = (animationTime - lineStartTime) / (this.fadeInDuration / lineProps.speed);
+                        const progress = (animationTime - lineStartTime) / animationDuration;
                         animationProgress = Math.min(1, progress);
                     }
                     // No fade out - lines stay visible once they appear (same as preview)
