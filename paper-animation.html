@@ -405,8 +405,8 @@
         
         <div class="upload-section">
             <label for="fileInput" class="file-input-wrapper">
-                📸 Upload Image
-                <input type="file" id="fileInput" accept="image/png,image/jpg,image/jpeg,image/gif" />
+                📸 Upload Png Image
+                <input type="file" id="fileInput" accept="image/png" />
             </label>
         </div>
 
@@ -421,58 +421,39 @@
             <h3>🎬 Animation Controls</h3>
             <div class="control-group">
                 <label for="speedSlider">Speed</label>
-                <input type="range" id="speedSlider" min="0.5" max="3" step="0.1" value="1">
-                <span id="speedValue">1.0x</span>
+                <input type="range" id="speedSlider" min="0.5" max="3" step="0.1" value="2">
+                <span id="speedValue">2.0x</span>
             </div>
             <div class="control-group">
                 <label for="rotationSlider">Rotation (°)</label>
-                <input type="range" id="rotationSlider" min="0" max="10" step="0.5" value="3">
-                <span id="rotationValue">3°</span>
+                <input type="range" id="rotationSlider" min="0" max="10" step="0.5" value="1.5">
+                <span id="rotationValue">1.5°</span>
             </div>
             <div class="control-group">
                 <label for="floatSlider">Float Distance</label>
-                <input type="range" id="floatSlider" min="5" max="30" step="1" value="15">
-                <span id="floatValue">15px</span>
+                <input type="range" id="floatSlider" min="5" max="30" step="1" value="10">
+                <span id="floatValue">10px</span>
             </div>
 
             <div class="control-group">
                 <label for="jitterSlider">Jitter</label>
-                <input type="range" id="jitterSlider" min="0" max="3" step="0.1" value="1">
-                <span id="jitterValue">1.0</span>
+                <input type="range" id="jitterSlider" min="0" max="5" step="0.1" value="2.5">
+                <span id="jitterValue">2.5</span>
             </div>
             <div class="control-group">
                 <label for="edgeThicknessSlider">Edge Thickness</label>
-                <input type="range" id="edgeThicknessSlider" min="0" max="100" step="1" value="8">
-                <span id="edgeThicknessValue">8px</span>
+                <input type="range" id="edgeThicknessSlider" min="0" max="100" step="1" value="30">
+                <span id="edgeThicknessValue">30px</span>
             </div>
             <div class="control-group">
-                <label for="unfoldToggle">Unfold Effect</label>
-                <input type="checkbox" id="unfoldToggle" checked>
-                <span>Enable paper unfolding animation</span>
+                <label for="tornIntensitySlider">Torn Intensity</label>
+                <input type="range" id="tornIntensitySlider" min="0.5" max="3.0" step="0.1" value="2.0">
+                <span id="tornIntensityValue">2.0</span>
             </div>
         </div>
 
         <div class="export-section">
-            <h3>📹 Export Settings</h3>
-            <div class="control-group">
-                <label for="durationInput">Duration (seconds)</label>
-                <input type="number" id="durationInput" value="5" min="1" max="30" step="0.5">
-            </div>
-            <div class="control-group">
-                <label for="exportFormat">Export Format</label>
-                <select id="exportFormat">
-                    <option value="webm">WebM (Fast)</option>
-                    <option value="mp4">MP4 (High Quality)</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <label for="qualitySelect">Quality</label>
-                <select id="qualitySelect">
-                    <option value="high">High Quality (8 Mbps)</option>
-                    <option value="medium">Medium Quality (5 Mbps)</option>
-                    <option value="low">Low Quality (3 Mbps)</option>
-                </select>
-            </div>
+        
             <button id="exportBtn" class="export-button">
                 <span>🎬 Export Animation</span>
             </button>
@@ -485,7 +466,7 @@
         <div class="instructions">
             <h3>How to use:</h3>
             <ul>
-                <li>Click "Upload Image" to select an image file</li>
+                <li>Click "Upload Png Image" to select an image file</li>
                 <li>The image will be placed on vintage paper with torn edges</li>
                 <li>Your video plays inside the torn paper area</li>
                 <li>The effect is applied instantly on the canvas</li>
@@ -514,11 +495,12 @@
                 
                 // Animation settings
                 this.animationSettings = {
-                    speed: 1.0,
-                    rotationRange: 3,
-                    floatDistance: 15,
-                    jitterAmount: 1.0,
-                    edgeThickness: 8
+                    speed: 2.0,
+                    rotationRange: 1.5,
+                    floatDistance: 10,
+                    jitterAmount: 2.5,
+                    edgeThickness: 30,
+                    tornIntensity: 2.0
                 };
                 
                 // Debounce timer for edge thickness updates
@@ -542,7 +524,8 @@
                     rotationRange: { slider: 'rotationSlider', value: 'rotationValue', suffix: '°' },
                     floatDistance: { slider: 'floatSlider', value: 'floatValue', suffix: 'px' },
                     jitterAmount: { slider: 'jitterSlider', value: 'jitterValue', suffix: '' },
-                    edgeThickness: { slider: 'edgeThicknessSlider', value: 'edgeThicknessValue', suffix: 'px' }
+                    edgeThickness: { slider: 'edgeThicknessSlider', value: 'edgeThicknessValue', suffix: 'px' },
+                    tornIntensity: { slider: 'tornIntensitySlider', value: 'tornIntensityValue', suffix: '' }
                 };
 
                 Object.keys(controls).forEach(setting => {
@@ -554,8 +537,8 @@
                         this.animationSettings[setting] = value;
                         valueSpan.textContent = value + controls[setting].suffix;
                         
-                        // Debounced update for edge thickness changes
-                        if (setting === 'edgeThickness' && this.currentImage) {
+                        // Debounced update for edge thickness and torn intensity changes
+                        if ((setting === 'edgeThickness' || setting === 'tornIntensity') && this.currentImage) {
                             // Clear existing timer
                             if (this.edgeThicknessTimer) {
                                 clearTimeout(this.edgeThicknessTimer);
@@ -574,9 +557,6 @@
                 this.exportBtn = document.getElementById('exportBtn');
                 this.exportStatus = document.getElementById('exportStatus');
                 this.exportStatusText = document.getElementById('exportStatusText');
-                this.durationInput = document.getElementById('durationInput');
-                this.qualitySelect = document.getElementById('qualitySelect');
-                this.exportFormatSelect = document.getElementById('exportFormat');
 
                 this.exportBtn.addEventListener('click', this.startExport.bind(this));
             }
@@ -824,10 +804,24 @@
                 const file = event.target.files[0];
                 if (!file) return;
 
+                // Check file type before processing
+                if (file.type !== 'image/png') {
+                    alert('Please upload a PNG image only. Other formats are not supported.');
+                    event.target.value = '';
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const img = new Image();
                     img.onload = () => {
+                        // Block images larger than 2500px in either dimension
+                        if (img.width > 2500 || img.height > 2500) {
+                            alert(`Image is too large (${img.width}x${img.height}). Maximum allowed size is 2500x2500 pixels. Please resize your image and try again.`);
+                            // Clear the file input to reset it
+                            event.target.value = '';
+                            return;
+                        }
                         this.processImage(img);
                     };
                     img.src = e.target.result;
@@ -959,27 +953,30 @@
             }
 
             expandOutlinePixel(expandedMask, centerX, centerY, width, height, maxExpansion) {
-                // Create more jagged, irregular torn expansion like in the reference image
-                const steps = 24; // Fewer steps for more jagged look
+                // Get torn intensity from settings (0.5 = smooth, 3.0 = very jagged)
+                const tornIntensity = this.animationSettings.tornIntensity;
+                
+                // Adjust steps based on torn intensity (more steps = smoother edges)
+                const steps = Math.max(12, Math.floor(36 / tornIntensity)); // 12-72 steps
                 
                 for (let i = 0; i < steps; i++) {
                     const angle = (i / steps) * Math.PI * 2;
                     
-                    // More aggressive random variations for jagged edges
+                    // Scale noise and randomness based on torn intensity
                     const baseExpansion = maxExpansion * 0.8;
-                    const noise1 = Math.sin(angle * 4 + centerX * 0.15) * 3;
-                    const noise2 = Math.cos(angle * 6 + centerY * 0.15) * 3;
-                    const randomNoise = (Math.random() - 0.5) * 8; // More random variation
+                    const noise1 = Math.sin(angle * 4 + centerX * 0.15) * (3 * tornIntensity);
+                    const noise2 = Math.cos(angle * 6 + centerY * 0.15) * (3 * tornIntensity);
+                    const randomNoise = (Math.random() - 0.5) * (8 * tornIntensity); // Scale random variation
                     const expansion = Math.max(2, baseExpansion + noise1 + noise2 + randomNoise);
                     
                     // Create jagged tears with varying intensity
-                    const jaggedSteps = Math.ceil(expansion * 1.2);
+                    const jaggedSteps = Math.ceil(expansion * (1.2 * tornIntensity));
                     for (let j = 0; j <= jaggedSteps; j++) {
                         const progress = j / jaggedSteps;
                         let currentExpansion = expansion * progress;
                         
-                        // Add micro-jitter for more realistic paper tear
-                        const microJitter = (Math.random() - 0.5) * 2;
+                        // Add micro-jitter scaled by torn intensity
+                        const microJitter = (Math.random() - 0.5) * (2 * tornIntensity);
                         currentExpansion += microJitter;
                         
                         const x = Math.round(centerX + Math.cos(angle) * currentExpansion);
@@ -989,12 +986,14 @@
                             expandedMask[y * width + x] = true;
                             
                             // Add surrounding pixels for thicker torn edge
+                            // Higher torn intensity = more irregular surrounding fill
+                            const fillProbability = Math.max(0.1, 0.7 - (tornIntensity * 0.2));
                             for (let dx = -1; dx <= 1; dx++) {
                                 for (let dy = -1; dy <= 1; dy++) {
                                     const nx = x + dx;
                                     const ny = y + dy;
                                     if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                                        if (Math.random() > 0.3) { // 70% chance to fill surrounding
+                                        if (Math.random() > fillProbability) {
                                             expandedMask[ny * width + nx] = true;
                                         }
                                     }
@@ -1127,10 +1126,6 @@
                 this.ctx.textAlign = 'center';
                 this.ctx.strokeStyle = '#000000';
                 this.ctx.lineWidth = 4;
-                this.ctx.strokeText('Upload an image to see the vintage paper effect!', 
-                    this.canvas.width / 2, this.canvas.height / 2);
-                this.ctx.fillText('Upload an image to see the vintage paper effect!', 
-                    this.canvas.width / 2, this.canvas.height / 2);
             }
 
             destroy() {
@@ -1149,47 +1144,38 @@
                     return;
                 }
 
-                const duration = parseFloat(this.durationInput.value);
-                if (isNaN(duration) || duration <= 0) {
-                    alert('Please enter a valid duration');
-                    return;
-                }
+                const duration = 10; // Fixed 10 second duration
 
                 // Disable export button during recording
                 this.exportBtn.disabled = true;
-                this.exportBtn.innerHTML = '<span>🔴 Recording...</span>';
-                this.updateExportStatus('Initializing recording...');
+                this.exportBtn.innerHTML = '<span>🔴 Exporting...</span>';
+                this.updateExportStatus('Initializing video export...');
 
                 // Capture canvas stream with high quality settings
                 let stream = this.canvas.captureStream(60); // 60fps
 
-                // Get export format and quality settings
-                const exportFormat = this.exportFormatSelect.value;
-                const quality = this.qualitySelect.value;
-                
-                // Try different codec options based on format preference
+                // Hardcoded MP4 8 Mbps export settings
                 let options = {};
                 
-                if (exportFormat === "mp4") {
-                    // Try MP4 codecs first
-                    const mp4Codecs = [
-                        'video/mp4;codecs=h264',
-                        'video/mp4',
-                        'video/webm;codecs=h264'
-                    ];
-                    
-                    for (const codec of mp4Codecs) {
-                        if (MediaRecorder.isTypeSupported(codec)) {
-                            options = {
-                                mimeType: codec,
-                                videoBitsPerSecond: quality === 'high' ? 8000000 : quality === 'medium' ? 5000000 : 3000000
-                            };
-                            break;
-                        }
+                // Try MP4 codecs first with 8 Mbps bitrate
+                const mp4Codecs = [
+                    'video/mp4;codecs=h264',
+                    'video/mp4',
+                    'video/webm;codecs=h264'
+                ];
+                
+                for (const codec of mp4Codecs) {
+                    if (MediaRecorder.isTypeSupported(codec)) {
+                        options = {
+                            mimeType: codec,
+                            videoBitsPerSecond: 8000000 // Fixed 8 Mbps
+                        };
+                        console.log(`Using codec: ${codec} at 8 Mbps`);
+                        break;
                     }
                 }
                 
-                // Fallback to WebM if MP4 not supported or WebM preferred
+                // Fallback to WebM with 8 Mbps if MP4 not supported
                 if (!options.mimeType) {
                     const webmCodecs = [
                         'video/webm;codecs=vp9',
@@ -1201,10 +1187,9 @@
                         if (MediaRecorder.isTypeSupported(codec)) {
                             options = {
                                 mimeType: codec,
-                                videoBitsPerSecond: exportFormat === "mp4" ? 
-                                    (quality === 'high' ? 8000000 : quality === 'medium' ? 5000000 : 3000000) :
-                                    (quality === 'high' ? 5000000 : quality === 'medium' ? 3000000 : 2000000)
+                                videoBitsPerSecond: 8000000 // Fixed 8 Mbps
                             };
+                            console.log(`Fallback to codec: ${codec} at 8 Mbps`);
                             break;
                         }
                     }
@@ -1214,8 +1199,9 @@
                 if (!options.mimeType) {
                     options = {
                         mimeType: 'video/webm',
-                        videoBitsPerSecond: quality === 'high' ? 3000000 : quality === 'medium' ? 2000000 : 1000000
+                        videoBitsPerSecond: 8000000 // Fixed 8 Mbps
                     };
+                    console.log('Using final fallback: video/webm at 8 Mbps');
                 }
 
                 let recorder = new MediaRecorder(stream, options);
@@ -1224,13 +1210,15 @@
                 recorder.ondataavailable = e => chunks.push(e.data);
                 recorder.onstop = () => {
                     this.updateExportStatus('Processing video...');
-                    let blob = new Blob(chunks, { type: 'video/webm' });
+                    let blob = new Blob(chunks, { type: recorder.mimeType });
                     
                     // Determine file extension based on the actual mime type
                     const mimeType = recorder.mimeType || 'video/webm';
                     const isMP4 = mimeType.includes('mp4') || mimeType.includes('h264');
                     const fileExtension = isMP4 ? 'mp4' : 'webm';
                     const fileName = `vintage-paper-animation-${Date.now()}.${fileExtension}`;
+                    
+                    console.log(`Exporting as: ${fileName} (${mimeType})`);
                     
                     let url = URL.createObjectURL(blob);
                     let a = document.createElement('a');
@@ -1242,12 +1230,12 @@
                     // Re-enable export button
                     this.exportBtn.disabled = false;
                     this.exportBtn.innerHTML = '<span>🎬 Export Animation</span>';
-                    this.updateExportStatus('Video exported successfully! ✨');
+                    this.updateExportStatus(`Video exported successfully! ✨`);
                     setTimeout(() => this.updateExportStatus('', false), 3000);
                 };
 
                 recorder.start();
-                this.updateExportStatus(`Recording animation (${duration}s)`);
+                this.updateExportStatus(`Exporting video, please wait...`);
 
                 // Start the animation for the specified duration
                 const startTime = Date.now();
@@ -1260,7 +1248,7 @@
 
                 // Stop recording after duration
                 setTimeout(() => {
-                    this.updateExportStatus('Finishing recording...');
+                    this.updateExportStatus('Finishing video export...');
                     recorder.stop();
                 }, durationMs);
             }
